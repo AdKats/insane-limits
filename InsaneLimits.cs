@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Miguel Mendoza - miguel@micovery.com, PapaCharlie9, Singh400, EBastard
+ * Copyright 2011 Miguel Mendoza - miguel@micovery.com, PapaCharlie9, Singh400, EBastard, Hedius
  *
  * Insane Balancer is free software: you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation, either version 3 of the License,
@@ -29,8 +29,7 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using Microsoft.CSharp;
 using System.CodeDom;
-
-
+using System.IO.Compression;
 using PRoCon.Core;
 using PRoCon.Core.Plugin;
 using PRoCon.Core.Plugin.Commands;
@@ -1214,6 +1213,7 @@ namespace PRoConEvents
                 this.booleanVariables.Add("use_white_list", false);
                 this.booleanVariables.Add("use_direct_fetch", true);
                 this.booleanVariables.Add("use_weapon_stats", false);
+                this.booleanVariables.Add("use_battlelog_proxy", false);
                 this.booleanVariables.Add("use_slow_weapon_stats", false);
                 this.booleanVariables.Add("use_stats_log", false);
                 this.booleanVariables.Add("use_custom_lists", false);
@@ -1229,7 +1229,7 @@ namespace PRoConEvents
                 this.booleanVariables.Add("tweet_my_plugin_state", true);
                 this.booleanVariables.Add("auto_hide_sections", true);
                 this.booleanVariables.Add("smtp_ssl", true);
-
+                
                 this.hidden_variables.Add("use_weapon_stats", true);
 
                 this.booleanVarValidators = new Dictionary<string, booleanVariableValidator>();
@@ -1240,6 +1240,7 @@ namespace PRoConEvents
                 this.booleanVarValidators.Add("use_white_list", booleanValidator);
                 this.booleanVarValidators.Add("use_direct_fetch", booleanValidator);
                 this.booleanVarValidators.Add("use_weapon_stats", booleanValidator);
+                this.booleanVarValidators.Add("use_battlelog_proxy", booleanValidator);
                 this.booleanVarValidators.Add("use_slow_weapon_stats", booleanValidator);
                 this.booleanVarValidators.Add("use_stats_log", booleanValidator);
                 this.booleanVarValidators.Add("use_custom_lists", booleanValidator);
@@ -1283,6 +1284,8 @@ namespace PRoConEvents
                 this.stringVariables.Add("smtp_account", "procon.insane.limits@gmail.com");
                 this.stringVariables.Add("smtp_mail", "procon.insane.limits@gmail.com");
                 this.stringVariables.Add("smtp_password", Decode("dG90YWxseWluc2FuZQ=="));
+
+                this.stringVariables.Add("proxy_url", "http://127.0.0.1:3128");
 
 
                 this.stringVariables.Add("twitter_verifier_pin", default_PIN_message);
@@ -1347,8 +1350,6 @@ namespace PRoConEvents
                 custom_stmp_group.Add("smtp_ssl");
                 settings_group.Add(MailG, custom_stmp_group);
 
-
-
                 List<String> custom_twitter_group = new List<string>();
                 custom_twitter_group.Add("twitter_setup_account");
                 custom_twitter_group.Add("twitter_reset_defaults");
@@ -1358,6 +1359,10 @@ namespace PRoConEvents
                 custom_twitter_group.Add("twitter_consumer_key");
                 custom_twitter_group.Add("twitter_consumer_secret");
                 settings_group.Add(TwitterG, custom_twitter_group);
+
+                List<String> proxy_group = new List<string>();
+                proxy_group.Add("proxy_url");
+                settings_group.Add(ProxyG, proxy_group);
 
                 List<String> privacy_policy = new List<string>();
                 privacy_policy.Add("tweet_my_server_bans");
@@ -1374,8 +1379,9 @@ namespace PRoConEvents
                 settings_group_order.Add(MailG, 4);
                 settings_group_order.Add(TwitterG, 5);
                 settings_group_order.Add(StorageG, 6);
-                settings_group_order.Add(ListManagerG, 7);
-                settings_group_order.Add(LimitManagerG, 8);
+                settings_group_order.Add(ProxyG, 7);
+                settings_group_order.Add(ListManagerG, 8);
+                settings_group_order.Add(LimitManagerG, 9);
 
                 /* Exported Variables are those that should live in the *conf file */
                 exported_variables.Add("tweet_my_server_bans");
@@ -3757,7 +3763,7 @@ namespace PRoConEvents
 
         public string GetPluginVersion()
         {
-            return "0.9.17.0";
+            return "0.9.18.1";
         }
 
         public string GetPluginAuthor()
@@ -4677,6 +4683,18 @@ public interface DataDictionaryInterface
                 <b>use_direct_fetch</b> to True will act as a fallback system, fetching
                 stats directly from Battlelog. Otherwise, stats fetching will
                 fail since the cache is not available and this setting is False.
+                </blockquote>
+          </li>
+          <li><blockquote><b>use_battlelog_proxy</b><br />
+                <i>True</i> - Send requests to web services over a proxy.<br />
+                <i>False</i> - Do not use a proxy.<br />
+                <br />
+                </blockquote>
+          </li>
+          <li><blockquote><b>proxy_url</b><br />
+                <i>(string, url)</i> - Format: http://IP:PORT - http://user:password@IP:PORT<br />
+                <br />
+                The URL of the proxy server.
                 </blockquote>
           </li>
           <li><blockquote><b>use_slow_weapon_stats</b><br />
@@ -7389,6 +7407,7 @@ public interface DataDictionaryInterface
         public const String StorageG = "Custom Storage";
         public const String TwitterG = "Custom Twitter";
         public const String SettingsG = "Settings";
+        public const String ProxyG = "Proxy for HTTP Requests";
 
         public bool shouldSkipGroup(String name)
         {
@@ -7412,6 +7431,9 @@ public interface DataDictionaryInterface
                 return true;
 
             if (name.StartsWith(TwitterG) && !getBooleanVarValue("use_custom_twitter"))
+                return true;
+            
+            if (name.StartsWith(ProxyG) && !getBooleanVarValue("use_battlelog_proxy"))
                 return true;
 
 
@@ -13654,7 +13676,75 @@ public interface DataDictionaryInterface
         //private HttpWebRequest req = null;
         //private CookieContainer cookies = null;
 
-        WebClient client = null;
+        private GZipWebClient client = null;
+        private String curAddress = "";
+        
+        public class GZipWebClient : WebClient {
+            private String ua;
+            private bool compress;
+            
+            public GZipWebClient() {
+                this.ua = "Mozilla/5.0 (compatible; PRoCon 1; Insane Limits)";
+                base.Headers["User-Agent"] = ua;
+                compress = true;
+            }
+
+            public GZipWebClient(bool compress) : this() {
+                this.compress = compress;
+            }
+
+            public string GZipDownloadString(string address) {
+                return this.GZipDownloadString(new Uri(address));
+            }
+
+            public string GZipDownloadString(Uri address) {
+                base.Headers[HttpRequestHeader.UserAgent] = ua;
+                
+                if (compress == false)
+                    return base.DownloadString(address);
+                
+                base.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
+                var stream = this.OpenRead(address);
+                if (stream == null)
+                    return "";
+                
+                var contentEncoding = ResponseHeaders[HttpResponseHeader.ContentEncoding];
+                base.Headers.Remove(HttpRequestHeader.AcceptEncoding);
+
+                Stream decompressedStream = null;
+                StreamReader reader = null;
+                if (!string.IsNullOrEmpty(contentEncoding) && contentEncoding.ToLower().Contains("gzip")) {
+                    decompressedStream = new GZipStream(stream, CompressionMode.Decompress);
+                    reader = new StreamReader(decompressedStream);
+                }
+                else {
+                    reader = new StreamReader(stream);
+                }
+                var data =  reader.ReadToEnd();
+                reader.Close();
+                decompressedStream?.Close();
+                stream.Close();
+                return data;
+            }
+            
+            public void SetProxy(String proxyURL)
+            {
+                if(!String.IsNullOrEmpty(proxyURL))
+                {
+                    Uri uri = new Uri(proxyURL);
+                    this.Proxy = new WebProxy(proxyURL, true); 
+                    if (!String.IsNullOrEmpty(uri.UserInfo))
+                    {
+                        string[] parameters = uri.UserInfo.Split(':');
+                        if (parameters.Length < 2) 
+                        {
+                            return;
+                        }
+                        this.Proxy.Credentials = new NetworkCredential(parameters[0], parameters[1]);
+                    }
+                }
+            }
+        } 
 
         public BattleLog(InsaneLimits plugin)
         {
@@ -13665,24 +13755,39 @@ public interface DataDictionaryInterface
         public void CleanUp()
         {
             client = null; // Release WebClient to avoid re-use error
+            curAddress = "";
         }
-
 
         private String fetchWebPage(ref String html_data, String url)
         {
             try
             {
                 if (client == null) {
-                    client = new WebClient();
+                    curAddress = null;
                     String ua = "Mozilla/5.0 (compatible; PRoCon 1; Insane Limits)";
+                    client = new GZipWebClient(ua); 
                     // XXX String ua = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; .NET CLR 3.5.30729)";
                     plugin.DebugWrite("Using user-agent: " + ua, 4);
-                    client.Headers.Add("user-agent", ua);
+                }
+                
+                // proxy support
+                if (plugin.getBooleanVarValue("use_battlelog_proxy")) {
+                    // set proxy
+                    try {
+                        var address = plugin.getStringVarValue("proxy_url");
+                        if (curAddress == null || client.Proxy == null || !curAddress.Equals(address)) {
+                            client.SetProxy(address); 
+                            curAddress = address;
+                        }
+                    }
+                    catch (UriFormatException) {
+                        plugin.ConsoleError("Invalid Proxy URL set!");
+                    }
                 }
                 
                 DateTime since = DateTime.Now;
 
-                html_data = client.DownloadString(url);
+                html_data = client.GZipDownloadString(url);
                 
                 /* TESTS
                 String testUrl = "http://status.savanttools.com/?code=";
