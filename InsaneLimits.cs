@@ -13764,10 +13764,8 @@ public interface DataDictionaryInterface
             {
                 if (client == null) {
                     curAddress = null;
-                    String ua = "Mozilla/5.0 (compatible; PRoCon 1; Insane Limits)";
-                    client = new GZipWebClient(ua); 
+                    client = new GZipWebClient(); 
                     // XXX String ua = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0; .NET CLR 3.5.30729)";
-                    plugin.DebugWrite("Using user-agent: " + ua, 4);
                 }
                 
                 // proxy support
