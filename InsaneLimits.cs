@@ -3763,7 +3763,7 @@ namespace PRoConEvents
 
         public string GetPluginVersion()
         {
-            return "0.9.18.1";
+            return "0.9.18.2";
         }
 
         public string GetPluginAuthor()
