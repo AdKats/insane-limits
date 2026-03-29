@@ -1,18 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -43,25 +35,15 @@ namespace PRoConEvents
         {
             String class_name = getClassName(limit);
 
-
             String class_source =
 @"namespace PRoConEvents
 {
     using System;
     using System.IO;
-    using System.Text;
     using System.Text.RegularExpressions;
     using System.Collections.Generic;
-    using System.Collections;
-    using System.Net;
-    using System.Net.Mail;
-    using System.Data;
-    using System.Threading;
     // .net 3.5 additions: procon 1.4.1.1 and later
     //using System.Linq;
-    using System.Xml;
-
-
 
     class %class_name%
     {
@@ -102,7 +84,6 @@ namespace PRoConEvents
             class_source = buildFunctionArguments(limit, "first_check_arguments", class_source);
             class_source = buildFunctionArguments(limit, "second_check_arguments", class_source);
 
-
             class_source = buildClassFunctionBody(limit, "FirstCheck", limit.FirstCheck, limit.FirstCheckCode, limit.FirstCheckExpression, class_source);
             class_source = buildClassFunctionBody(limit, "SecondCheck", limit.SecondCheck, limit.SecondCheckCode, limit.SecondCheckEpression, class_source);
 
@@ -118,7 +99,6 @@ namespace PRoConEvents
             else
                 throw new CompileException(FormatMessage("unknown method ^b" + method + "^n for " + limit.ShortDisplayName, MessageType.Error));
 
-
             List<String> lines = new List<String>(Regex.Split(code, "\n"));
 
             code = lines[0];
@@ -133,13 +113,11 @@ namespace PRoConEvents
         {
             String auto_return = String.Empty;
 
-
             // if disabled, or empty string make give it an auto-return value
             if (type.Equals(Limit.LimitType.Disabled) ||
                 (type.Equals(Limit.LimitType.Code) && code.Length == 0) ||
                 (type.Equals(Limit.LimitType.Expression) && expression.Length == 0))
                 return Regex.Replace(class_source, "%" + method + "%", FormatFunctionCode(limit, method, ""));
-
 
             if (type.Equals(Limit.LimitType.Code))
                 return Regex.Replace(class_source, "%" + method + "%", FormatFunctionCode(limit, method, code));
@@ -150,10 +128,8 @@ namespace PRoConEvents
                 throw new CompileException(FormatMessage("unknown type for " + limit.ShortDisplayName, MessageType.Error));
         }
 
-
         public void SendCompilingMessage(Limit limit)
         {
-
 
             ConsoleWrite("Compiling " + limit.FullDisplayName + " - " + limit.Evaluation.ToString());
 
@@ -162,12 +138,10 @@ namespace PRoConEvents
             if (limit.FirstCheckEmpty)
                 ConsoleWarn("^bfirst_check_" + limit.FirstCheck.ToString().ToLower() + "^n is empty for " + limit.ShortDisplayName);
 
-
             if (limit.SecondCheckEmpty)
                 ConsoleWarn("^bsecond_check_" + limit.SecondCheck.ToString().ToLower() + "^n is empty for " + limit.ShortDisplayName);
 
         }
-
 
         public void CompileLimit(Limit limit)
         {
@@ -189,7 +163,6 @@ namespace PRoConEvents
 
                 if (limit.FirstCheckEmpty)
                     return;
-
 
                 String class_source = buildLimitSource(limit);
 
@@ -235,9 +208,7 @@ namespace PRoConEvents
                         if (class_ctor == null)
                             throw new CompileException(FormatMessage("could not find constructor for ^b" + class_name + "^n", MessageType.Error));
 
-
                         Object class_object = class_ctor.Invoke(new Object[] { });
-
 
                         limit.evaluator = class_object;
                         limit.type = class_type;

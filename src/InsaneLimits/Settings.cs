@@ -1,16 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -47,9 +38,6 @@ namespace PRoConEvents
             JoinWith(thread, 3);
         }
 
-
-
-
         public void OnPluginDisable()
         {
             if (finalizer != null && finalizer.IsAlive)
@@ -62,7 +50,6 @@ namespace PRoConEvents
                 round_over = false;
                 isRoundReset = false;
                 level_loaded = false;
-
 
                 finalizer = new Thread(new ThreadStart(delegate ()
                     {
@@ -122,7 +109,6 @@ namespace PRoConEvents
 
         }
 
-
         public List<CPluginVariable> GetDisplayPluginVariables()
         {
             List<CPluginVariable> lstReturn = new List<CPluginVariable>();
@@ -147,7 +133,6 @@ namespace PRoConEvents
 
                     if (var_name.Contains("password"))
                         var_value = Regex.Replace(var_value, ".", "*");
-
 
                     String limit_group_title = String.Empty;
                     Boolean limit_group_visible = true;
@@ -183,14 +168,12 @@ namespace PRoConEvents
                         if (!limits.ContainsKey(id))
                             continue;
 
-
                         Limit limit = limits[id];
 
                         if (limit.isGroupFirstField(field))
                             limit_group_title = limit.getGroupFormattedTitleByKey(field);
 
                         limit_group_visible = limit.getGroupStateByKey(field);
-
 
                         if (field.Equals("ea_ban_duration"))
                             var_type = "enum." + var_name + "(" + String.Join("|", Enum.GetNames(typeof(EABanDuration))) + ")";
@@ -311,8 +294,6 @@ namespace PRoConEvents
 
                 }
 
-
-
             }
             catch (Exception e)
             {
@@ -323,12 +304,10 @@ namespace PRoConEvents
 
         }
 
-
         public String[] EnumValues(List<String> names)
         {
             names.Sort(delegate (String left, String right)
             {
-
 
                 if (left.Equals("None"))
                     return -1;
@@ -365,7 +344,6 @@ namespace PRoConEvents
             return names.ToArray();
         }
 
-
         public String getPluginVariableGroup(String name)
         {
             foreach (KeyValuePair<String, List<String>> group_pair in settings_group)
@@ -380,7 +358,6 @@ namespace PRoConEvents
                     return "List # {Unknown}";
 
                 CustomList list = lists[listId];
-
 
                 String max = getMaxListId();
                 String format = "List #{0," + max.Length + "} - " + list.Name + " (" + list.State.ToString() + ")";
@@ -411,7 +388,6 @@ namespace PRoConEvents
         {
             get { return getBooleanVarValue("privacy_policy_agreement"); }
         }
-
 
         public const String PrivacyPolicyG = "Custom Privacy Policy";
         public const String WhitelistG = "Whitelist";
@@ -450,11 +426,8 @@ namespace PRoConEvents
             if (name.StartsWith(ProxyG) && !getBooleanVarValue("use_battlelog_proxy"))
                 return true;
 
-
             if (name.StartsWith(PrivacyPolicyG) && !getBooleanVarValue("use_custom_privacy_policy"))
                 return true;
-
-
 
             return false;
         }
@@ -489,7 +462,6 @@ namespace PRoConEvents
 
                 return limits[limitId].shouldSkipFieldKey(name);
             }
-
 
             if (hidden_variables.ContainsKey(name) && hidden_variables[name])
                 return hidden_variables[name];

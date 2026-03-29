@@ -1,16 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -40,7 +34,6 @@ namespace PRoConEvents
 
             /* reset limits file, now that we have host and port */
             setStringVarValue("limits_file", getStringVarValue("limits_file"));
-
 
             ConsoleWrite("plugin loaded");
             this.RegisterEvents(
@@ -113,7 +106,6 @@ namespace PRoConEvents
                     ConsoleError("Cannot enable plugin while it is finalizing");
                     return;
                 }
-
 
                 ConsoleWrite("^b^2Enabled!^0");
                 plugin_enabled = true;
@@ -202,7 +194,6 @@ namespace PRoConEvents
                     {
                         DumpException(e);
                     }
-
 
                 }));
 
@@ -294,7 +285,6 @@ namespace PRoConEvents
                     ReplacementsDict.Add(Replacements[i], Replacements[i]);
         }
 
-
         public override void OnPunkbusterPlayerInfo(CPunkbusterInfo cpbiPlayer)
         {
             DebugWrite("Got ^bOnPunkbusterPlayerInfo^n!", 10); // FIXME 8
@@ -366,7 +356,6 @@ namespace PRoConEvents
             }
         }
 
-
         public void ResetPlayerSprees(BaseEvent type, PlayerInfo player, PlayerInfo killer, PlayerInfo victim, Kill info)
         {
 
@@ -410,7 +399,6 @@ namespace PRoConEvents
                         break;
                 }
         }
-
 
         public void evaluateLimitsForEvent(BaseEvent type, PlayerInfo player, PlayerInfo killer, PlayerInfo victim, Kill info)
         {
@@ -485,7 +473,6 @@ namespace PRoConEvents
             DebugWrite("+++ Evaluated ^b" + all.Count + "^n limits", 6);
         }
 
-
         public void UpdateStats(PlayerInfo killer, PlayerInfo victim, BaseEvent type, Kill info, String weapon)
         {
             try
@@ -507,7 +494,6 @@ namespace PRoConEvents
                     // update the player's TeamKills/TeamDeaths
                     killer.W[weapon].TeamKillsRound++;
                     victim.W[weapon].TeamDeathsRound++;
-
 
                     //update the server's TeamKills/TeamDeaths
                     serverInfo.W[weapon].TeamKillsRound++;
@@ -535,7 +521,6 @@ namespace PRoConEvents
             catch (Exception) { }
         }
 
-
         public BaseEvent DetermineBaseEvent(Kill info)
         {
 
@@ -555,7 +540,6 @@ namespace PRoConEvents
             else
                 return BaseEvent.Kill;
         }
-
 
         public static String InGameCommand_Pattern = @"^\s*([@/!\?])\s*";
 
@@ -671,7 +655,6 @@ namespace PRoConEvents
             return null;
         }
 
-
         public PlayerInfoInterface GetPlayer(String name)
         {
             return GetPlayer(name, true);
@@ -709,7 +692,6 @@ namespace PRoConEvents
                 String prefix = ExtractCommandPrefix(text);
                 String command = ExtractCommand(text);
 
-
                 // IGC begin
                 DebugWrite(@"^bOriginal command^n: " + text, 6);
 
@@ -718,7 +700,6 @@ namespace PRoConEvents
                 // IGC end
                 Match one1StatMatch = Regex.Match(command, @"^\s*(round|total|(?:online|battlelog|web))\s+(.+)", RegexOptions.IgnoreCase);
                 Match one2StatMatch = Regex.Match(command, @"^\s*(my|[^ ]+)(?:\s+(round|total|(?:online|battlelog|web)))?\s+(.+)", RegexOptions.IgnoreCase);
-
 
                 //same command, two alternatives
                 Match list1StatMatch = Regex.Match(command, @"^\s*info(?:\s+(round|total|(?:online|battlelog|web)))?", RegexOptions.IgnoreCase);
@@ -751,14 +732,12 @@ namespace PRoConEvents
 
             return;
 
-
         }
 
         public void ListStatCmd(String sender, String scope)
         {
             if (sender == null)
                 return;
-
 
             if (scope == null || scope.Length == 0 || !(scope.Equals("round") || scope.Equals("total")))
                 scope = "web";
@@ -807,8 +786,6 @@ namespace PRoConEvents
             if (sender == null)
                 return;
 
-
-
             if (player == null || player.Length == 0 || player.Trim().Equals("my"))
                 player = sender;
 
@@ -825,8 +802,6 @@ namespace PRoConEvents
             PlayerInfo sinfo = players[sender];
 
             Int32 edit_distance = 0;
-
-
 
             String new_player = null;
             if ((new_player = bestMatch(player, new List<String>(players.Keys), out edit_distance)) == null)
@@ -875,7 +850,6 @@ namespace PRoConEvents
                         fscope = fscope.Substring(0, 1).ToUpper() + fscope.Substring(1);
                         Double value = 0;
 
-
                         if (!Double.TryParse(property.GetValue((Object)pinfo, null).ToString(), out value))
                             return;
 
@@ -891,7 +865,6 @@ namespace PRoConEvents
                             Int64 hours = (Int64)span.Hours;
                             Int64 mins = (Int64)span.Minutes;
                             Int64 tsecs = (Int64)span.TotalSeconds;
-
 
                             if (thours > 0)
                             {
@@ -934,7 +907,6 @@ namespace PRoConEvents
             InGameCommand(sender, text);
         }
 
-
         public override void OnTeamChat(String sender, String text, Int32 TeamID)
         {
             DebugWrite("Got ^bOnTeamChat^n!", 8);
@@ -954,7 +926,6 @@ namespace PRoConEvents
 
         }
 
-
         public override void OnSquadChat(String sender, String text, Int32 TeamID, Int32 SquadID)
         {
             DebugWrite("Got ^bOnSquadChat^n!", 8);
@@ -972,7 +943,6 @@ namespace PRoConEvents
 
             InGameCommand(sender, text);
         }
-
 
         public override void OnPlayerSpawned(String name, Inventory inventory)
         {
@@ -1017,8 +987,6 @@ namespace PRoConEvents
                 evaluateLimitsForEvent(BaseEvent.RoundStart, null, null, null, null);
             }
 
-
-
             PlayerInfo player = null;
             if (!players.ContainsKey(name))
                 return;
@@ -1026,7 +994,6 @@ namespace PRoConEvents
 
             evaluateLimitsForEvent(BaseEvent.Spawn, player, null, null, null);
         }
-
 
         public override void OnPlayerJoin(String name)
         {
@@ -1329,8 +1296,6 @@ namespace PRoConEvents
                 players.TryGetValue(victim.SoldierName, out vpinfo);
                 players.TryGetValue(killer.SoldierName, out kpinfo);
 
-
-
                 // ignore event, no web stats available
                 if ((type.Equals(BaseEvent.Suicide) && vpinfo == null))
                     return;
@@ -1343,11 +1308,9 @@ namespace PRoConEvents
                 if (serverInfo == null)
                     return;
 
-
                 UpdateStats(kpinfo, vpinfo, type, info, ":" + info.DamageType);
 
                 evaluateLimitsForEvent(type, null, kpinfo, vpinfo, info);
-
 
             }
             catch (Exception e)
@@ -1371,7 +1334,6 @@ namespace PRoConEvents
         public void WaitOn(String name, EventWaitHandle handle)
         {
             Int32 timeout = getIntegerVarValue("wait_timeout");
-
 
             DebugWrite("waiting, timeout after " + timeout + " seconds", 7);
             if (handle.WaitOne(timeout * 1000) == false)
@@ -1549,7 +1511,6 @@ namespace PRoConEvents
             if (serverInfo != null)
                 serverInfo.WinTeamId = winTeamId;
 
-
         }
 
         public void RoundOverReset()
@@ -1714,8 +1675,6 @@ namespace PRoConEvents
             reserved_slots_list = lstSoldierNames;
         }
 
-
-
         public Boolean stringValidator(String var, String value)
         {
             try
@@ -1742,11 +1701,6 @@ namespace PRoConEvents
             return false;
         }
 
-
-
-
-
-
         private void PluginCommand(String sender, String cmd)
         {
 
@@ -1759,7 +1713,6 @@ namespace PRoConEvents
 
                 Match serverStatsMatch = Regex.Match(cmd, @"\s*[!@/]\s*(?:(weapon)\s+)?(round|total|map)\s+stats\s*", RegexOptions.IgnoreCase);
 
-
                 //Setting/Getting keys
                 Match setVarValueMatch = Regex.Match(cmd, @"\s*[!@/]\s*set\s+([^ ]+)\s+(.+)", RegexOptions.IgnoreCase);
                 Match setVarValueEqMatch = Regex.Match(cmd, @"\s*[!@/]\s*set\s+([^ ]+)\s*=\s*(.+)", RegexOptions.IgnoreCase);
@@ -1771,7 +1724,6 @@ namespace PRoConEvents
 
                 //Information
                 Match pluginSettingsMatch = Regex.Match(cmd, @"\s*[!@/]\s*settings", RegexOptions.IgnoreCase);
-
 
                 Boolean senderIsAdmin = true;
 
@@ -1802,7 +1754,6 @@ namespace PRoConEvents
             }
         }
 
-
         // modified algorithm to ignore insertions, and case
         public static Int32 LevenshteinDistance(String s, String t)
         {
@@ -1822,8 +1773,6 @@ namespace PRoConEvents
             for (Int32 i = 0; i <= n; d[i, 0] = i++) ;
             for (Int32 j = 0; j <= m; d[0, j] = j++) ;
 
-
-
             for (Int32 i = 1; i <= n; i++)
                 for (Int32 j = 1; j <= m; j++)
                     d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 0), d[i - 1, j - 1] + ((t[j - 1] == s[i - 1]) ? 0 : 1));
@@ -1841,7 +1790,6 @@ namespace PRoConEvents
         {
 
             best_distance = Int32.MaxValue;
-
 
             try
             {
@@ -1975,7 +1923,6 @@ namespace PRoConEvents
             else
                 serverInfo.dumpStatProperties(scope);
 
-
         }
 
         private void playerStatsDumpCmd(String sender, String level, String scope, String player)
@@ -1984,7 +1931,6 @@ namespace PRoConEvents
                 return;
 
             player = player.Trim();
-
 
             if ((player = bestPlayerMatch(sender, player, true, false)) == null)
                 return;
@@ -2089,7 +2035,6 @@ namespace PRoConEvents
             return setPluginVarGroup(sender, String.Join(",", vars.ToArray()), "false");
         }
 
-
         private Boolean setPluginVarGroup(String sender, String group, String val)
         {
 
@@ -2190,7 +2135,6 @@ namespace PRoConEvents
             return true;
         }
 
-
         private void SendPlayerYellV(String name, String message, Int32 duration)
         {
             if (name == null)
@@ -2219,9 +2163,7 @@ namespace PRoConEvents
             return text;
         }
 
-
         /* Messaging functions (Check for Virtual Mode) */
-
 
         public Boolean SendGlobalMessage(String message)
         {
@@ -2316,7 +2258,6 @@ namespace PRoConEvents
             delayed.Name = "squad_msg_delay";
             delayed.Start();
 
-
             return true;
         }
 
@@ -2390,7 +2331,6 @@ namespace PRoConEvents
             return true;
         }
 
-
         public Boolean VMode
         {
             get
@@ -2408,8 +2348,6 @@ namespace PRoConEvents
                 return (Boolean)mode;
             }
         }
-
-
 
         List<String> scratch_list = new List<String>();
 
@@ -2481,14 +2419,12 @@ namespace PRoConEvents
                     if (!player_lookup.ContainsKey(pinfo.SoldierName))
                         player_lookup.Add(pinfo.SoldierName, true);
 
-
                 List<String> players_to_remove = new List<String>();
 
                 // now make a list of players that will need to be removed
                 foreach (KeyValuePair<String, PlayerInfo> pair in players)
                     if (!player_lookup.ContainsKey(pair.Key) && !players_to_remove.Contains(pair.Key))
                         players_to_remove.Add(pair.Key);
-
 
                 // now actually remove them
                 foreach (String pname in players_to_remove)
@@ -2566,8 +2502,6 @@ namespace PRoConEvents
             resetUpdateTimer(WhichTimer.Squad);
         }
 
-
-
         public void RemovePlayer(String name)
         {
             DebugWrite("RemovePlayer locking, " + name, 8);
@@ -2577,7 +2511,6 @@ namespace PRoConEvents
             }
             DebugWrite("RemovePlayer UNLOCKING, " + name, 8);
         }
-
 
         private void InnerRemovePlayer(String name)
         {
@@ -2617,7 +2550,6 @@ namespace PRoConEvents
             SyncPlayersList(lstPlayers);
             UpdateExtraInfo(lstPlayers);
         }
-
 
         public Int32 sort_players_t_desc_cmp(String left_name, String right_name)
         {

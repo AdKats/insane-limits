@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -12,7 +10,6 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
@@ -52,8 +49,6 @@ namespace PRoConEvents
             public Dictionary<String, String> fields = null;
             public InsaneLimits plugin = null;
 
-
-
             public String Name
             {
                 get { return fields["name"]; }
@@ -84,7 +79,6 @@ namespace PRoConEvents
                 get { return fields["id"]; }
             }
 
-
             public ListState State
             {
                 get { return (ListState)Enum.Parse(typeof(ListState), fields["state"]); }
@@ -113,7 +107,6 @@ namespace PRoConEvents
 
                 return ritem != null;
             }
-
 
             private void SetupFields()
             {
@@ -176,7 +169,6 @@ namespace PRoConEvents
             {
                 return setFieldValue(var, val, false);
             }
-
 
             public Boolean setFieldValue(String var, String val, Boolean ui)
             {
@@ -309,7 +301,6 @@ namespace PRoConEvents
 
             }
 
-
             public CustomList(InsaneLimits plugin, String id)
             {
                 this.plugin = plugin;
@@ -400,7 +391,6 @@ namespace PRoConEvents
                 Yell = Actions.Yell
             };
 
-
             public enum LimitState
             {
                 Enabled = 0x01,
@@ -463,7 +453,6 @@ namespace PRoConEvents
                 "Yell Action",  "yell_group", @"^yell_",
             };
 
-
             public static List<String> valid_fields = new List<String>(new String[] {
                 "id", "hide", "state", "name",
                 "evaluation", "evaluation_interval",
@@ -488,7 +477,6 @@ namespace PRoConEvents
                 "delete",
                 "yell_group", "yell_message", "yell_audience", "yell_duration", "yell_procon_chat",
                 });
-
 
             public DataDictionaryInterface Data { get { return (DataDictionaryInterface)DataDict; } }
             public DataDictionaryInterface RoundData { get { return (DataDictionaryInterface)RoundDataDict; } }
@@ -529,13 +517,10 @@ namespace PRoConEvents
                 get { return "Limit #^b" + id + "^n"; }
             }
 
-
             public ShowHide Hide
             {
                 get { return ((ShowHide)Enum.Parse(typeof(ShowHide), fields["hide"])); }
             }
-
-
 
             public Boolean Enabled
             {
@@ -562,13 +547,10 @@ namespace PRoConEvents
                 get { return (LimitState)Enum.Parse(typeof(LimitState), fields["state"]); }
             }
 
-
             public Int64 Interval
             {
                 get { return Int64.Parse(fields["evaluation_interval"]); }
             }
-
-
 
             public Boolean FirstCheckEmpty
             {
@@ -726,7 +708,6 @@ namespace PRoConEvents
                 get { return fields["procon_chat_text"]; }
             }
 
-
             public String ServerCommandText
             {
                 get { return fields["server_command_text"]; }
@@ -747,7 +728,6 @@ namespace PRoConEvents
                 get { return fields["log_message"]; }
             }
 
-
             public String MailAddress
             {
                 get { return fields["mail_address"]; }
@@ -762,7 +742,6 @@ namespace PRoConEvents
             {
                 get { return fields["mail_body"]; }
             }
-
 
             public String SMSCountry
             {
@@ -861,8 +840,6 @@ namespace PRoConEvents
                 get { return Int32.Parse(fields["ea_ban_minutes"]); }
             }
 
-
-
             public Boolean Valid
             {
                 get { return !Invalid; }
@@ -884,12 +861,10 @@ namespace PRoConEvents
                 get { return fields["taskbar_notify_message"]; }
             }
 
-
             public String TaskbarNotifyTitle
             {
                 get { return fields["taskbar_notify_title"]; }
             }
-
 
             public String SoundNotifyFile
             {
@@ -918,7 +893,6 @@ namespace PRoConEvents
                 activations[player.Name].Add(new LimitEvent(this, player, server));
 
             }
-
 
             /*
             // Not needed anymore, OnJoin limits are evaluated once only in OnPlayerJoin
@@ -967,7 +941,6 @@ namespace PRoConEvents
                 return activations[PlayerName].Count;
             }
 
-
             public Double ActivationsTotal(String PlayerName)
             {
                 Double total = Activations(PlayerName);
@@ -977,7 +950,6 @@ namespace PRoConEvents
 
                 return total + activations_total[PlayerName].Count;
             }
-
 
             public Double Activations(Int32 TeamId, Int32 SquadId)
             {
@@ -1006,7 +978,6 @@ namespace PRoConEvents
 
                 return total;
             }
-
 
             public Double Activations(String PlayerName, TimeSpan time)
             {
@@ -1055,7 +1026,6 @@ namespace PRoConEvents
                 return total;
             }
 
-
             public Double Spree(String PlayerName)
             {
                 if (!sprees.ContainsKey(PlayerName))
@@ -1096,8 +1066,6 @@ namespace PRoConEvents
             }
              */
 
-
-
             public String fieldKeyByOffset(String name, Int32 offset)
             {
                 if (!valid_fields.Contains(name))
@@ -1109,7 +1077,6 @@ namespace PRoConEvents
 
                 return String.Empty;
             }
-
 
             public Boolean shouldSkipFieldKey(String name)
             {
@@ -1123,8 +1090,6 @@ namespace PRoConEvents
                         return false;
 
                     String field_key = extractFieldKey(name);
-
-
 
                     if (Hide.Equals(ShowHide.Hide) && !field_key.Equals("hide"))
                         return true;
@@ -1155,7 +1120,6 @@ namespace PRoConEvents
                     if (Regex.Match(field_key, @"mail_").Success &&
                         !((Action & LimitAction.Mail) > 0))
                         return true;
-
 
                     if (Regex.Match(field_key, @"ea_ban_").Success &&
                         !((Action & LimitAction.EABan) > 0))
@@ -1205,23 +1169,17 @@ namespace PRoConEvents
                         !((Action & LimitAction.ServerCommand) > 0))
                         return true;
 
-
-
-
                     if (Regex.Match(field_key, @"say_").Success &&
                         !((Action & LimitAction.Say) > 0))
                         return true;
-
 
                     if (Regex.Match(field_key, @"yell_").Success &&
                         !((Action & LimitAction.Yell) > 0))
                         return true;
 
-
                     if (Regex.Match(field_key, @"kill_").Success &&
                         !((Action & LimitAction.Kill) > 0))
                         return true;
-
 
                     if (Regex.Match(field_key, @"(kick)_").Success &&
                         !((Action & LimitAction.Kick) > 0))
@@ -1253,7 +1211,6 @@ namespace PRoConEvents
                          PBBDuration.Equals(PBBanDuration.Temporary)))
                         return true;
 
-
                 }
                 catch (Exception e)
                 {
@@ -1275,7 +1232,6 @@ namespace PRoConEvents
                 if (title2group == null)
                     title2group = new Dictionary<String, String>();
 
-
                 group2title.Clear();
                 group2regex.Clear();
                 title2group.Clear();
@@ -1286,13 +1242,11 @@ namespace PRoConEvents
                     return;
                 }
 
-
                 for (Int32 i = 0; i < valid_groups.Length; i = i + 3)
                 {
                     String title = valid_groups[i];
                     String group = valid_groups[i + 1];
                     String regex = valid_groups[i + 2];
-
 
                     if (!group2title.ContainsKey(group))
                         group2title.Add(group, title);
@@ -1372,7 +1326,6 @@ namespace PRoConEvents
                 setFieldValue("server_command_group", auto_hide);
                 setFieldValue("server_command_text", "admin.say \"Hello World\" all");
 
-
                 setFieldValue("kick_group", auto_hide);
                 setFieldValue("kick_message", "violated " + FullReplaceName);
 
@@ -1433,7 +1386,6 @@ namespace PRoConEvents
 
                 DataDict = new DataDictionary(plugin);
                 RoundDataDict = new DataDictionary(plugin);
-
 
             }
 
@@ -1501,7 +1453,6 @@ namespace PRoConEvents
                 return title2group.ContainsKey(extractGroupBaseTitle(var));
             }
 
-
             public Boolean isValidFieldKey(String var)
             {
 
@@ -1549,7 +1500,6 @@ namespace PRoConEvents
                     plugin.CompileLimit(this);
                 }
             }
-
 
             public void AccumulateActivations()
             {
@@ -1650,7 +1600,6 @@ namespace PRoConEvents
                     return 0;
                 }
 
-
                 Int64 r = Interval - elapsed;
                 plugin.DebugWrite(ShortDisplayName + " - " + Evaluation.ToString() + ", " + r + " second" + ((r > 1) ? "s" : "") + " remaining", 7);
 
@@ -1665,7 +1614,6 @@ namespace PRoConEvents
                 ResetLastInterval(DateTime.Now);
                 Data.Clear();
             }
-
 
             public Boolean validateAndSetFieldValue(String field, String val, Boolean ui)
             {   //plugin.ConsoleWrite(field + " = " + val + ", UI: " + ui.ToString());
@@ -1699,7 +1647,6 @@ namespace PRoConEvents
                     )
                 {
 
-
                     /* Parse Enum */
                     Type type = null;
                     if (field.Equals("state"))
@@ -1723,13 +1670,11 @@ namespace PRoConEvents
                     else if (Regex.Match(field, "_group").Success || field.Equals("hide"))
                         type = typeof(ShowHide);
 
-
                     try
                     {
                         String origValue = fields[field];
 
                         fields[field] = Enum.Format(type, Enum.Parse(type, val, true), "G").ToString();
-
 
                         if (field.Equals("second_check") &&
                             !SecondCheck.Equals(LimitType.Disabled) &&
@@ -1792,7 +1737,6 @@ namespace PRoConEvents
                     Int32 integerValue = 0;
                     if (!Int32.TryParse(val, out integerValue))
                         return false;
-
 
                     if (Regex.Match(field, @"(id|((ea|pb)_ban_minutes))").Success &&
                             !plugin.intAssertGTE(field, integerValue, 1))
@@ -1858,7 +1802,6 @@ namespace PRoConEvents
                 return true;
             }
 
-
             public Boolean setFieldValue(String var, String val)
             {
                 return setFieldValue(var, val, false);
@@ -1875,7 +1818,6 @@ namespace PRoConEvents
                 if (!title2group.ContainsKey(title))
                     return false;
 
-
                 String state = getField(title2group[title]);
                 try
                 {
@@ -1890,14 +1832,12 @@ namespace PRoConEvents
             public Boolean getGroupStateByKey(String key)
             {
 
-
                 String title = getGroupBaseTitleByKey(extractFieldKey(key));
                 if (title.Length == 0)
                     return true;
 
                 return getGroupStateByTitle(title);
             }
-
 
             public Boolean setGroupStateByTitle(String title, String val, Boolean ui)
             {
@@ -1934,8 +1874,6 @@ namespace PRoConEvents
                 return fields[field_key];
             }
 
-
-
             public static Boolean isLimitVar(String var)
             {
 
@@ -1954,15 +1892,12 @@ namespace PRoConEvents
                 if (vmatch.Success)
                     return vmatch.Groups[1].Value;
 
-
                 Match hmatch = Regex.Match(var, @"^\s*\[\s*([^ \]]+)\s*\]", RegexOptions.IgnoreCase);
                 if (hmatch.Success)
                     return hmatch.Groups[1].Value;
 
                 return "UnknownId";
             }
-
-
 
             public Dictionary<String, String> getSettings(Boolean display)
             {
@@ -1988,7 +1923,6 @@ namespace PRoConEvents
                     settings.Add("limit_" + id + "_" + key, value);
                 }
 
-
                 return settings;
             }
         }
@@ -2010,7 +1944,6 @@ namespace PRoConEvents
         public TwitterException(String message, Int32 code) : base(message) { this.code = code; }
     }
 
-
     public class CompileException : Exception
     {
         public CompileException(String message) : base(message) { }
@@ -2021,11 +1954,9 @@ namespace PRoConEvents
         public EvaluationException(String message) : base(message) { }
     }
 
-
     public class BattleLog
     {
         private InsaneLimits plugin = null;
-
 
         //private HttpWebRequest req = null;
         //private CookieContainer cookies = null;
@@ -2251,7 +2182,6 @@ namespace PRoConEvents
             return false;
         }
 
-
         private String fetchJSON(ref String bigText, String url, String playerName, String requestType)
         {
             Boolean directFetchEnabled = plugin.getBooleanVarValue("use_direct_fetch");
@@ -2285,7 +2215,6 @@ namespace PRoConEvents
 
             //return String.Empty;
         }
-
 
         public PlayerInfo fetchStats(PlayerInfo pinfo)
         {
@@ -2394,7 +2323,6 @@ namespace PRoConEvents
                             personaId = spid.Groups[1].Value.Trim();
                         }
                     }
-
 
                     if (String.IsNullOrEmpty(personaId))
                         throw new StatsException("could not find persona-id for ^b" + player + "^n");
@@ -2505,7 +2433,6 @@ namespace PRoConEvents
                 }
                 fetchJSON(ref result, furl, player, "overview");
 
-
                 if (!plugin.plugin_enabled)
                 {
                     throw new StatsException("fetchStats aborted, disabling plugin ...");
@@ -2565,7 +2492,6 @@ namespace PRoConEvents
                     id2kit["2048"] = "commander";
                 }
 
-
                 /* verify there is kit times (seconds) structure */
                 Hashtable kitTimes = null;
                 if (!stats.ContainsKey("kitTimes") || (kitTimes = (Hashtable)stats["kitTimes"]) == null)
@@ -2604,7 +2530,6 @@ namespace PRoConEvents
 
                         if (DateTime.Now.Subtract(since).TotalSeconds > 1) plugin.DebugWrite("^2^bTIME^n took " + DateTime.Now.Subtract(since).TotalSeconds.ToString("F2") + " secs, dumpStatProperties", 5);
                     }
-
 
                     /* extract weapon level statistics */
                     List<BattlelogWeaponStats> wstats = null;
@@ -2772,7 +2697,6 @@ namespace PRoConEvents
                     if ((wstat = (Hashtable)item) == null)
                         throw new Exception("weapon item null");
 
-
                     BattlelogWeaponStats bwstats = new BattlelogWeaponStats();
 
                     String ttmp = null;
@@ -2936,7 +2860,6 @@ namespace PRoConEvents
                 if (pair.Value == null)
                     throw new StatsException("could not find ^b" + pair.Key + "^n in the ^bkitMap^n");
 
-
             maps.Add(kit2id);
             maps.Add(id2kit);
 
@@ -2952,7 +2875,6 @@ namespace PRoConEvents
                     String key = (String)(entry.Key).ToString();
                     String value = (String)(table[key]).ToString();
 
-
                     /* skip the ones we are not interested in */
                     if (!id2kit.ContainsKey(key))
                         continue;
@@ -2966,10 +2888,7 @@ namespace PRoConEvents
             }
         }
 
-
     }
-
-
 
     public class KillInfo : KillInfoInterface
     {
@@ -2992,7 +2911,6 @@ namespace PRoConEvents
         }
 
     }
-
 
     public class KillReason : KillReasonInterface
     {
@@ -3027,7 +2945,6 @@ namespace PRoConEvents
         */
     }
 
-
     public class ServerInfo : ServerInfoInterface
     {
         InsaneLimits plugin = null;
@@ -3047,7 +2964,6 @@ namespace PRoConEvents
         public DataDictionary RoundDataDict = null;
 
         public WeaponStatsDictionary W;
-
 
         public Dictionary<String, Double> svalue;
         public Dictionary<String, Double> rvalue;
@@ -3112,10 +3028,8 @@ namespace PRoConEvents
         [A("total")]
         public Double TimeUp { get { return data.ServerUptime; } }
 
-
         [A("total")]
         public Int32 MaxPlayers { get { return data.MaxPlayerCount; } }
-
 
         public WeaponStatsInterface this[String WeaponName] { get { return W[WeaponName]; } }
         public DataDictionaryInterface Data { get { return (DataDictionaryInterface)DataDict; } }
@@ -3147,7 +3061,6 @@ namespace PRoConEvents
 
             return Double.NaN;
         }
-
 
         public Double Tickets(Int32 TeamId)
         {
@@ -3206,7 +3119,6 @@ namespace PRoConEvents
             }
         }
 
-
         /* Meta Data */
         public String Port { get { return plugin.server_port; } }
         public String Host { get { return plugin.server_host; } }
@@ -3232,7 +3144,6 @@ namespace PRoConEvents
                 return -1;
             return _Faction[TeamId];
         }
-
 
         public ServerInfo(InsaneLimits plugin, CServerInfo data, List<MaplistEntry> mlist, Int32[] indices)
         {
@@ -3361,8 +3272,6 @@ namespace PRoConEvents
 
     }
 
-
-
     public class A : Attribute
     {
         private String name;
@@ -3373,7 +3282,6 @@ namespace PRoConEvents
 
         private String pattern;
         public String Pattern { get { return pattern; } }
-
 
         public A(String scope)
         {
@@ -3387,7 +3295,6 @@ namespace PRoConEvents
             this.pattern = pattern;
         }
     }
-
 
     public class TeamInfo : TeamInfoInterface
     {
@@ -3435,8 +3342,6 @@ namespace PRoConEvents
 
             return plugin.Aggregate(property_name, typeof(PlayerInfo), dict);
         }
-
-
 
         public TeamInfo(InsaneLimits plugin, Int32 TeamId, Dictionary<String, PlayerInfo> players, ServerInfo server)
         {
@@ -3487,7 +3392,6 @@ namespace PRoConEvents
         public Dictionary<String, List<KillInfoInterface>> tkkDict = null;
         public Dictionary<String, List<KillInfoInterface>> vDict = null;
         public Dictionary<String, List<KillInfoInterface>> kDict = null;
-
 
         /* Online statistics (basic)*/
         [A("web", "Rank", @"ra.*")]
@@ -3576,7 +3480,6 @@ namespace PRoConEvents
         [A("web", "Vehicle Percent", @"ve[^ ]*\s*(pe|%).*")]
         public Double VehiclePercent { get { return ovalue["vehicle_p"]; } }
 
-
         /* Player data */
 
         public String Name { get { return pbInfo.SoldierName; } }
@@ -3652,8 +3555,6 @@ namespace PRoConEvents
         public Dictionary<String, List<KillInfoInterface>> Victims { get { return vDict; } }
         public Dictionary<String, List<KillInfoInterface>> Killers { get { return kDict; } }
 
-
-
         /* Other data */
 
         public DateTime JoinTime { get { return ctime; } }
@@ -3661,12 +3562,10 @@ namespace PRoConEvents
         public Boolean Battlelog404 { get { return _battlelog404; } set { _battlelog404 = value; } }
         public Boolean StatsError { get { return _stats_error; } set { _stats_error = value; } }
 
-
         /* Whitelist info */
         public Boolean inClanWhitelist { get { return plugin.isInClanWhitelist(Name); } }
         public Boolean inPlayerWhitelist { get { return plugin.isInPlayerWhitelist(Name); } }
         public Boolean isInWhitelist { get { return plugin.isInWhitelist(Name); } }
-
 
         public WeaponStatsInterface this[String WeaponName] { get { return W[WeaponName]; } }
         public BattlelogWeaponStatsInterface GetBattlelog(String WeaponName) { return BWS[WeaponName]; }
@@ -3706,7 +3605,6 @@ namespace PRoConEvents
             Int32 score_change = (new_score - old_score);
 
             this.info = info;
-
 
             ScoreRound += score_change;
         }
@@ -3768,7 +3666,6 @@ namespace PRoConEvents
 
         }
 
-
         public Double ratio(Double left, Double right)
         {
             if (Double.IsNaN(left) || Double.IsNaN(right) || left <= 0)
@@ -3785,7 +3682,6 @@ namespace PRoConEvents
             List<String> values = new List<String>();
             foreach (String key in ovalue.Keys)
                 values.Add(key + "(" + Math.Round(ovalue[key], 2) + ")");
-
 
             return "tag(" + tag + ")," + String.Join(", ", values.ToArray());
         }
@@ -3808,8 +3704,6 @@ namespace PRoConEvents
             plugin.DebugWrite(scope + "-Stats for " + FullDisplayName + " logged to: " + log, 3);
             plugin.dumpPairs(pairs, 4, logName);
         }
-
-
 
         public void dumpWeaponStats(String scope)
         {
@@ -3938,7 +3832,6 @@ namespace PRoConEvents
             }
         }
 
-
         public Boolean isset(Type type, String key)
         {
             lock (data)
@@ -3977,7 +3870,6 @@ namespace PRoConEvents
         {
             return getKeys(typeof(String));
         }
-
 
         /* Int Data */
         public Int32 setInt(String key, Int32 value)
@@ -4031,7 +3923,6 @@ namespace PRoConEvents
             return getKeys(typeof(Double));
         }
 
-
         /* Bool Data */
         public Boolean setBool(String key, Boolean value)
         {
@@ -4057,7 +3948,6 @@ namespace PRoConEvents
         {
             return getKeys(typeof(Boolean));
         }
-
 
         /* Object Data */
         public Object setObject(String key, Object value)
@@ -4158,7 +4048,6 @@ namespace PRoConEvents
         [A("total")]
         public Double HeadshotsTotal { get { return _headshots_total + HeadshotsRound; } internal set { _headshots_total = value; } }
 
-
         public void ResetRoundStats()
         {
             KillsRound = 0;
@@ -4207,7 +4096,6 @@ namespace PRoConEvents
 
         public WeaponStats this[String WeaponName] { get { return getWeaponData(WeaponName); } }
 
-
         private String bestWeaponMatch(String name)
         {
             return bestWeaponMatch(name, true);
@@ -4221,7 +4109,6 @@ namespace PRoConEvents
                 EventWeapon = true;
             else if (name.StartsWith("U_")) // BF4
                 EventWeapon = true;
-
 
             if (plugin.WeaponsDict.ContainsKey(name))
                 return name;
@@ -4302,7 +4189,6 @@ namespace PRoConEvents
         public Double Aggregate(String property_name)
         {
 
-
             Double total = 0;
             Type type = typeof(WeaponStats);
             PropertyInfo property = type.GetProperty(property_name);
@@ -4345,8 +4231,6 @@ namespace PRoConEvents
                 return (attrs.Length == 0 || !typeof(A).Equals(attrs[0].GetType()) || !((A)attrs[0]).Scope.ToLower().Equals(source.ToLower()));
             });
 
-
-
             foreach (KeyValuePair<String, WeaponStats> pair in data)
             {
                 WeaponStats wstats = pair.Value;
@@ -4381,7 +4265,6 @@ namespace PRoConEvents
             }
         }
     }
-
 
     public class BattlelogWeaponStatsDictionary
     {
@@ -4594,21 +4477,16 @@ namespace PRoConEvents
         }
     }
 
-
     public class OAuthRequest
     {
         public HttpWebRequest request = null;
         InsaneLimits plugin = null;
 
-
-
         HMACSHA1 SHA1 = null;
 
         public List<KeyValuePair<String, String>> parameters = new List<KeyValuePair<String, String>>();
 
-
         public HTTPMethod Method { set { request.Method = value.ToString(); } get { return (HTTPMethod)Enum.Parse(typeof(HTTPMethod), request.Method); } }
-
 
         public OAuthRequest(InsaneLimits plugin, String URL)
         {
@@ -4616,7 +4494,6 @@ namespace PRoConEvents
             this.request = (HttpWebRequest)HttpWebRequest.Create(URL);
             this.request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 4.0.20506)";
         }
-
 
         public void Sort()
         {
@@ -4661,7 +4538,6 @@ namespace PRoConEvents
 
             String http_method = request.Method;
 
-
             Sort();
 
             List<String> encoded_parameters = new List<String>();
@@ -4693,7 +4569,6 @@ namespace PRoConEvents
 
             plugin.DebugWrite("BASE_SIGNATURE: " + base_signature, 7);
 
-
             String HMACSHA1_signature = HMACSHA1_HASH(base_signature, ConsumerSecret, AccessTokenSecret);
 
             plugin.DebugWrite("HMACSHA1_SIGNATURE: " + HMACSHA1_signature, 7);
@@ -4714,7 +4589,6 @@ namespace PRoConEvents
 
             return Convert.ToBase64String(SHA1.ComputeHash(System.Text.Encoding.ASCII.GetBytes(text)));
         }
-
 
         public static String UnreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
 
@@ -4749,4 +4623,3 @@ namespace PRoConEvents
         }
     }
 }
-

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -177,7 +176,6 @@ namespace PRoConEvents
 
             Data.Clear();
         }
-
 
         Dictionary<String, PlayerInfo> new_players_batch = new Dictionary<String, PlayerInfo>();
 
@@ -490,7 +488,6 @@ namespace PRoConEvents
                                     players_to_remove.Add(pair.Key);
                                 }
 
-
                         // now remove them
                         foreach (String pname in players_to_remove)
                             if (new_players_batch.ContainsKey(pname))
@@ -502,7 +499,6 @@ namespace PRoConEvents
                             DebugWrite("Will insert a batch of " + bb + " player" + ((bb > 1) ? "s" : ""), 5);
                         }
                         else bb = 0;
-
 
                         foreach (KeyValuePair<String, PlayerInfo> pair in new_players_batch)
                             if (pair.Value != null && scratch_list.Contains(pair.Key))
@@ -551,7 +547,6 @@ namespace PRoConEvents
 
                     DebugWrite("^4^bTIME^n took " + DateTime.Now.Subtract(batchSince).TotalSeconds.ToString("F2") + " secs, process player batch", 5);
 
-
                     // abort the thread if the plugin was disabled
                     if (!plugin_enabled)
                     {
@@ -597,8 +592,6 @@ namespace PRoConEvents
             return start_line;
         }
 
-
-
         public class SayMessage
         {
             public MessageAudience audience = MessageAudience.All;
@@ -618,7 +611,6 @@ namespace PRoConEvents
         }
 
         public Queue<SayMessage> messageQueue = new Queue<SayMessage>();
-
 
         public void QueueSayMessage(SayMessage message)
         {
@@ -662,7 +654,6 @@ namespace PRoConEvents
             }
         }
 
-
         public void say_thread_loop()
         {
 
@@ -691,7 +682,6 @@ namespace PRoConEvents
                     if (!plugin_enabled)
                         break;
                 }
-
 
                 // abort the thread if the plugin was disabled
                 if (!plugin_enabled)
@@ -733,7 +723,6 @@ namespace PRoConEvents
                         settings_handle.Reset();
                         settings_handle.WaitOne(sleep_t * 1000);
                         plugin.DebugWrite("awake! loading settings", 7);
-
 
                         if (!plugin_enabled)
                             break;
@@ -859,7 +848,6 @@ namespace PRoConEvents
                             isRoundReset = false;
                         }
 
-
                         if (sorted_limits.Count == 0)
                         {
                             continue;
@@ -868,7 +856,6 @@ namespace PRoConEvents
                         {
                             DebugWrite("signal from ^bfetch^n received and " + sorted_limits.Count + " interval limits ready to fire ...", 7);
                         }
-
 
                         // make sure we are the only ones scanning the player's list
                         List<String> sorted_players = null;
@@ -880,7 +867,6 @@ namespace PRoConEvents
                         // sort the players in by join time in descending order
                         sorted_players.Sort(sort_players_t_desc_cmp);
                         DumpPlayersList(sorted_players, 10);
-
 
                         for (Int32 i = 0; i < sorted_limits.Count; i++)
                         {
@@ -918,7 +904,6 @@ namespace PRoConEvents
                                     // if there are no stats, skip this player
                                     if (pinfo == null)
                                         continue;
-
 
                                     plugin.DebugWrite("Evaluating " + limit.ShortDisplayName + " for ^b" + name + "^n", 6);
 
@@ -960,7 +945,6 @@ namespace PRoConEvents
 
                 }
 
-
                 // abort the thread if the plugin was disabled
                 if (!plugin_enabled)
                 {
@@ -995,8 +979,6 @@ namespace PRoConEvents
             return this.serverInfo;
         }
 
-
-
         public void getPlayersList()
         {
             ServerCommand("admin.listPlayers", "all");
@@ -1007,7 +989,6 @@ namespace PRoConEvents
         public void getPlayersListSync()
         {
             ServerCommand("admin.listPlayers", "all");
-
 
         }
 
@@ -1109,7 +1090,6 @@ namespace PRoConEvents
             return new List<String>(gamekeys.Keys);
         }
 
-
         public Boolean setPluginVarValue(String var, String val)
         {
             return setPluginVarValue(null, var, val, false);
@@ -1138,12 +1118,9 @@ namespace PRoConEvents
                     return false;
                 }
 
-
-
                 /* Parse Integer Values */
                 Int32 integerValue = 0;
                 Boolean isIntegerValue = Int32.TryParse(val, out integerValue);
-
 
                 /* Parse Boolean Values */
                 Boolean booleanValue = false;
@@ -1156,16 +1133,13 @@ namespace PRoConEvents
                 else
                     isBooleanValue = false;
 
-
                 /* Parse Float Values */
                 Single floatValue = 0F;
                 Boolean isFloatValue = Single.TryParse(val, out floatValue);
 
-
                 /* Parse String List */
                 List<String> stringListValue = new List<String>(Regex.Split(val.Replace(";", ",").Replace("|", ","), @"\s*,\s*"));
                 Boolean isStringList = true;
-
 
                 /* Parse String var */
                 String stringValue = val;
@@ -1251,8 +1225,6 @@ namespace PRoConEvents
             return false;
         }
 
-
-
         public String getLimitVarId(String var)
         {
             if (!Limit.isLimitVar(var))
@@ -1289,7 +1261,6 @@ namespace PRoConEvents
 
             return list.getField(var).ToString();
         }
-
 
         public String getLimitVarValue(String var)
         {
@@ -1334,7 +1305,6 @@ namespace PRoConEvents
                     ConsoleError("^b" + var + "^n has no valid list field");
                     return false;
                 }
-
 
                 Boolean result = list.setFieldValue(var, val, ui);
 
@@ -1382,12 +1352,10 @@ namespace PRoConEvents
             }
         }
 
-
         public Boolean setLimitVarValue(String var, String val, Boolean ui)
         {
             try
             {
-
 
                 //ConsoleWrite("Updating limit " + var + " to " + val);
 
@@ -1416,7 +1384,6 @@ namespace PRoConEvents
                 // headers do not need extra processing
                 if (limit.isValidGroupTitle(var))
                     return limit.setGroupStateByTitle(var, val, ui);
-
 
                 Boolean result = limit.setFieldValue(var, val, ui);
 
@@ -1465,7 +1432,6 @@ namespace PRoConEvents
             }
         }
 
-
         public Boolean isIntegerVar(String var)
         {
             return this.integerVariables.ContainsKey(var);
@@ -1510,9 +1476,7 @@ namespace PRoConEvents
         {
             return booleanVarValidators.ContainsKey(var);
 
-
         }
-
 
         public Boolean floatValidator(String var, Single value)
         {
@@ -1609,7 +1573,6 @@ namespace PRoConEvents
             return true;
         }
 
-
         public Boolean booleanValidator(String var, Boolean value)
         {
 
@@ -1617,7 +1580,6 @@ namespace PRoConEvents
             {
                 Int32 count = limits.Count;
                 SaveSettings(false);
-
 
                 return false;
             }
@@ -1652,11 +1614,8 @@ namespace PRoConEvents
                 return true;
             }
 
-
-
             return true;
         }
-
 
         public Boolean DefaultTweet(String status)
         {
@@ -1682,7 +1641,6 @@ namespace PRoConEvents
             return Tweet(status, access_token, access_token_seceret, consumer_key, consumer_secret, false);
         }
 
-
         public Boolean Tweet
             (
             String status,
@@ -1703,7 +1661,6 @@ namespace PRoConEvents
 
                 if (String.IsNullOrEmpty(status))
                     throw new TwitterException("Cannot update Twitter status, invalid ^bstatus^n value");
-
 
                 if (String.IsNullOrEmpty(access_token) || String.IsNullOrEmpty(access_token_secret) ||
                     String.IsNullOrEmpty(consumer_key) || String.IsNullOrEmpty(consumer_secret))
@@ -1773,8 +1730,6 @@ namespace PRoConEvents
                 if (String.IsNullOrEmpty(oauth_token) || String.IsNullOrEmpty(oauth_token_secret))
                     throw new TwitterException("Cannot verify Twitter PIN, There is no ^boauth_token^n or ^boauth_token_secret^n in memory");
 
-
-
                 OAuthRequest orequest = TwitterAccessTokenRequest(PIN, oauth_token, oauth_token_secret);
 
                 HttpWebResponse oresponse = (HttpWebResponse)orequest.request.GetResponse();
@@ -1792,9 +1747,7 @@ namespace PRoConEvents
 
                 DebugWrite("ACCESS_TOKEN_RESPONSE: " + response, 5);
 
-
                 Dictionary<String, String> pairs = ParseQueryString(response);
-
 
                 /* Sanity check the results */
                 if (pairs.Count == 0)
@@ -1820,7 +1773,6 @@ namespace PRoConEvents
                 if (pairs.ContainsKey("screen_name"))
                     screen_name = pairs["screen_name"];
 
-
                 ConsoleWrite("Access token, and secret obtained. Twitter setup is now complete.");
                 if (!String.IsNullOrEmpty(user_id))
                     ConsoleWrite("Twitter User-Id: ^b" + user_id + "^n");
@@ -1829,7 +1781,6 @@ namespace PRoConEvents
 
                 DebugWrite("access_token=" + oauth_token, 4);
                 DebugWrite("access_token_secret=" + oauth_token_secret, 4);
-
 
                 setStringVarValue("twitter_access_token", oauth_token);
                 setStringVarValue("twitter_access_token_secret", oauth_token_secret);
@@ -1852,9 +1803,7 @@ namespace PRoConEvents
                 DumpException(e);
             }
 
-
         }
-
 
         public void SetupTwitter()
         {
@@ -1864,7 +1813,6 @@ namespace PRoConEvents
                 hidden_variables["twitter_verifier_pin"] = false;
                 oauth_token = String.Empty;
                 oauth_token_secret = String.Empty;
-
 
                 OAuthRequest orequest = TwitterRequestTokenRequest();
 
@@ -1900,8 +1848,6 @@ namespace PRoConEvents
                     throw new TwitterException("Twitter RequestToken Request failed, missing ^boauth_token_secret^n field");
                 oauth_token_secret = pairs["oauth_token_secret"];
 
-
-
                 DebugWrite("REQUEST_TOKEN_RESPONSE: " + response, 5);
                 DebugWrite("oauth_callback_confirmed=" + oauth_callback_confirmed, 4);
                 DebugWrite("oauth_token=" + oauth_token, 4);
@@ -1909,7 +1855,6 @@ namespace PRoConEvents
 
                 ConsoleWrite("Please visit the following site to obtain the ^btwitter_verifier_pin^n");
                 ConsoleWrite("http://api.twitter.com/oauth/authorize?oauth_token=" + oauth_token);
-
 
             }
             catch (TwitterException e)
@@ -1984,7 +1929,6 @@ namespace PRoConEvents
             return pairs;
         }
 
-
         public static Int32 MAX_STATUS_LENGTH = 140;
         public OAuthRequest TwitterStatusUpdateRequest(
             String status,
@@ -1998,11 +1942,9 @@ namespace PRoConEvents
             if (String.IsNullOrEmpty(status))
                 return null;
 
-
             String suffix = "...";
             if (status.Length > MAX_STATUS_LENGTH)
                 status = status.Substring(0, MAX_STATUS_LENGTH - suffix.Length) + suffix;
-
 
             OAuthRequest orequest = new OAuthRequest(this, "https://api.twitter.com/1.1/statuses/update.json"); // Fix #48
             orequest.Method = HTTPMethod.POST;
@@ -2039,7 +1981,6 @@ namespace PRoConEvents
             return orequest;
         }
 
-
         public OAuthRequest TwitterAccessTokenRequest(String verifier, String token, String secret)
         {
             OAuthRequest orequest = new OAuthRequest(this, "https://api.twitter.com/oauth/access_token"); // Fix #48
@@ -2063,8 +2004,6 @@ namespace PRoConEvents
             String OAuthHeader = orequest.Header();
             orequest.request.AuthenticationLevel = System.Net.Security.AuthenticationLevel.MutualAuthRequired;
             orequest.request.Headers["Authorization"] = OAuthHeader;
-
-
 
             return orequest;
         }
@@ -2094,7 +2033,6 @@ namespace PRoConEvents
 
             return orequest;
         }
-
 
         public Boolean intAssertGTE(String var, Int32 value, Int32 min_value)
         {
@@ -2128,7 +2066,6 @@ namespace PRoConEvents
 
             return true;
         }
-
 
         private Boolean hasStringValidator(String var)
         {
@@ -2189,7 +2126,6 @@ namespace PRoConEvents
                             settings += "procon.protected.plugins.setVariable \"" + cname + "\" \"" + pair.Key + "\" \"BASE64:" + Encode(pair.Value) + "\"" + NL;
                     }
 
-
                     keys = new List<String>(lists.Keys);
                     foreach (String key in keys)
                     {
@@ -2202,10 +2138,8 @@ namespace PRoConEvents
                             settings += "procon.protected.plugins.setVariable \"" + cname + "\" \"" + pair.Key + "\" \"BASE64:" + Encode(pair.Value) + "\"" + NL;
                     }
 
-
                     if (!File.Exists(file) && !quiet)
                         ConsoleWarn("file ^b" + file + "^n does not exist, will create new one");
-
 
                     DumpData(settings, file);
 
@@ -2225,9 +2159,6 @@ namespace PRoConEvents
 
             return true;
         }
-
-
-
 
         public Boolean LoadSettings(Boolean force, Boolean quiet)
         {
@@ -2266,7 +2197,6 @@ namespace PRoConEvents
 
                         if (collection.Count != 3)
                             continue;
-
 
                         String var = collection[1].Groups[1].Value;
                         String value = collection[2].Groups[1].Value;
@@ -2327,7 +2257,6 @@ namespace PRoConEvents
                 return false;
             }
 
-
             if (hasStringValidator(var))
             {
                 stringVariableValidator validator = stringVarValidators[var];
@@ -2335,20 +2264,13 @@ namespace PRoConEvents
                     return false;
             }
 
-
-
             this.stringVariables[var] = val;
-
 
             if (var.Equals("limits_file"))
                 this.stringVariables[var] = FixLimitsFilePath();
 
-
-
             return true;
         }
-
-
 
         private Boolean isStringListVar(String var)
         {
@@ -2426,7 +2348,6 @@ namespace PRoConEvents
             return floatVarValidators.ContainsKey(var);
         }
 
-
         public Boolean isBooleanVar(String var)
         {
             return this.booleanVariables.ContainsKey(var);
@@ -2451,7 +2372,6 @@ namespace PRoConEvents
                 return false;
             }
 
-
             if (hasBooleanValidator(var))
             {
                 booleanVariableValidator validator = booleanVarValidators[var];
@@ -2468,7 +2388,6 @@ namespace PRoConEvents
         {
             return getPluginVars().Contains(var) || Limit.isLimitVar(var) || CustomList.isListVar(var);
         }
-
 
         public String getPluginVarValue(String var)
         {
@@ -2532,8 +2451,6 @@ namespace PRoConEvents
             return getPluginVars(include_limits, include_lists, true, display);
         }
 
-
-
         public List<String> getPluginVars(Boolean include_limits, Boolean include_lists, Boolean include_vars, Boolean display)
         {
             List<String> vars = new List<String>();
@@ -2590,8 +2507,6 @@ namespace PRoConEvents
                         vars.Remove(var);
                 }
             }
-
-
 
             return vars;
         }
@@ -2658,7 +2573,6 @@ namespace PRoConEvents
                 if (!Path.IsPathRooted(path))
                     path = Path.Combine(Directory.GetParent(Environment.ProcessPath).FullName, path);
 
-
                 using (FileStream fs = File.Open(path, FileMode.Append))
                 {
                     Byte[] info = new UTF8Encoding(true).GetBytes(s);
@@ -2686,12 +2600,10 @@ namespace PRoConEvents
                 String class_name = this.GetType().Name;
                 String path = class_name + ".dump";
 
-
                 if (prefix == null)
                     prefix = String.Empty;
                 else
                     prefix += ": ";
-
 
                 if (e.GetType().Equals(typeof(ThreadAbortException)))
                 {
@@ -2748,12 +2660,10 @@ namespace PRoConEvents
                 trace_str += "Stack Trace: \n" + e.StackTrace + "\n\n";
                 trace_str += "MSIL Stack Trace:\n";
 
-
                 StackTrace trace = new StackTrace(e);
                 StackFrame[] frames = trace.GetFrames();
                 foreach (StackFrame frame in frames)
                     trace_str += "    " + frame.GetMethod() + ", IL: " + String.Format("0x{0:X}", frame.GetILOffset()) + "\n";
-
 
                 Byte[] info = new UTF8Encoding(true).GetBytes(trace_str);
                 fs.Write(info, 0, info.Length);
@@ -2762,7 +2672,6 @@ namespace PRoConEvents
         }
 
         public enum MessageType { Warning, Error, Exception, Normal };
-
 
         public String FormatMessage(String msg, MessageType type)
         {
@@ -2780,7 +2689,6 @@ namespace PRoConEvents
 
             return prefix + msg.Replace('{', '(').Replace('}', ')');
         }
-
 
         public void LogWrite(String msg)
         {
@@ -2817,8 +2725,6 @@ namespace PRoConEvents
             if (getIntegerVarValue("debug_level") >= level)
                 ConsoleWrite(msg, MessageType.Normal);
         }
-
-
 
         public void ServerCommand(params String[] args)
         {
@@ -2996,7 +2902,6 @@ namespace PRoConEvents
 
             return formatted;
         }
-
 
         public String FriendlyMapName(String mapFileName)
         {
@@ -3207,7 +3112,6 @@ namespace PRoConEvents
             if (!players.ContainsKey(name))
                 return false;
 
-
             this.ServerCommand("admin.killPlayer", name);
             return true;
         }
@@ -3226,7 +3130,6 @@ namespace PRoConEvents
                 return false;
             }
 
-
             if (isInWhitelist(name))
             {
                 ConsoleWarn("not kicking ^b" + name + "^n, in white-list");
@@ -3241,8 +3144,6 @@ namespace PRoConEvents
 
             return true;
         }
-
-
 
         public Boolean EABanPlayerWithMessage(EABanType type, EABanDuration duration, String name, Int32 minutes, String message)
         {
@@ -3303,8 +3204,6 @@ namespace PRoConEvents
             else if (duration.Equals(EABanDuration.Temporary))
                 timeout = "seconds";
 
-
-
             String suffix = String.Empty;
 
             if (duration.Equals(EABanDuration.Temporary))
@@ -3337,8 +3236,6 @@ namespace PRoConEvents
             return true;
         }
 
-
-
         public Boolean MovePlayer(String name, Int32 TeamId, Int32 SquadId, Boolean force)
         {
             if (VMode)
@@ -3362,7 +3259,6 @@ namespace PRoConEvents
             this.ServerCommand("admin.movePlayer", name, TeamId.ToString(), SquadId.ToString(), force.ToString().ToLower());
             return true;
         }
-
 
         public Boolean PBCommand(String text)
         {
@@ -3495,7 +3391,6 @@ namespace PRoConEvents
             return null;
         }
 
-
         public Boolean PBBanPlayerWithMessage(PBBanDuration duration, String name, Int32 minutes, String message)
         {
 
@@ -3526,7 +3421,6 @@ namespace PRoConEvents
 
             String pb_message = message + suffix;
 
-
             if (duration.Equals(PBBanDuration.Permanent))
                 this.ServerCommand("punkBuster.pb_sv_command", String.Join(" ", new String[] { "pb_sv_ban", name, pb_message, "|", "BC2!" }));
             else if (duration.Equals(PBBanDuration.Temporary))
@@ -3547,7 +3441,6 @@ namespace PRoConEvents
             return true;
         }
 
-
         public static String list2string(List<String> list, String glue)
         {
 
@@ -3565,7 +3458,6 @@ namespace PRoConEvents
 
             return str + glue + last;
         }
-
 
         public static String Encode(String str)
         {
@@ -3587,7 +3479,6 @@ namespace PRoConEvents
 
                 if (!getBooleanVarValue("use_custom_lists"))
                     return false;
-
 
                 foreach (KeyValuePair<String, CustomList> pair in lists)
                     if (pair.Value != null && pair.Value.Name.Equals(list_name))
@@ -3617,7 +3508,6 @@ namespace PRoConEvents
             return isInWhiteList(player, "clan_white_list");
         }
 
-
         public Boolean isInWhiteList(String name, String list_name)
         {
             if (!getBooleanVarValue("use_white_list"))
@@ -3632,7 +3522,6 @@ namespace PRoConEvents
             List<String> whitelist = getStringListVarValue(list_name);
             if (whitelist.Count == 0)
                 return false;
-
 
             String field = "";
             if (Regex.Match(list_name, @"clan").Success)
@@ -3782,7 +3671,6 @@ namespace PRoConEvents
                 PropertyInfo prop = plist[i];
                 String name = prop.Name;
 
-
                 Double value = 0;
 
                 if (!Double.TryParse(prop.GetValue(Object, null).ToString(), out value))
@@ -3854,7 +3742,6 @@ namespace PRoConEvents
 
             return total;
         }
-
 
         /* External plugin support */
 
@@ -4131,7 +4018,6 @@ namespace PRoConEvents
         }
 
         /* R38/Procon 1.4.0.7 */
-
 
         public override void OnPlayerIdleDuration(String soldierName, Int32 idleTime)
         {

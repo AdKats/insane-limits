@@ -13,17 +13,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Net.Mail;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 using Microsoft.CodeAnalysis;
@@ -40,10 +33,6 @@ using PRoCon.Core.Plugin.Commands;
 using CapturableEvent = PRoCon.Core.Events.CapturableEvents;
 //Aliases
 using EventType = PRoCon.Core.Events.EventType;
-
-
-
-
 
 namespace PRoConEvents
 {
@@ -108,8 +97,6 @@ namespace PRoConEvents
         TeamChange = 0x200,
         Leave = 0x400
     };
-
-
 
     public enum Actions
     {
@@ -231,7 +218,6 @@ namespace PRoConEvents
     public interface LimitInfoInterface
     {
 
-
         //Number of times the limit has been activated, (Current round)
         Double Activations(String PlayerName);
         Double Activations(Int32 TeamId, Int32 SquadId);
@@ -256,7 +242,6 @@ namespace PRoConEvents
          */
 
         Double Spree(String PlayerName);
-
 
         // manually resets the Spree value for the player, (only for power-users)
         void ResetSpree(String PlayerName);
@@ -322,7 +307,6 @@ namespace PRoConEvents
         Double HeadshotsTotal { get; }
     }
 
-
     public interface ServerInfoInterface
     {
         /* Server State */
@@ -355,7 +339,6 @@ namespace PRoConEvents
         Double SuicidesRound { get; }
         Double TeamKillsRound { get; }
 
-
         /* All players, All rounds, Stats */
 
         Double KillsTotal { get; }
@@ -364,11 +347,8 @@ namespace PRoConEvents
         Double SuicidesTotal { get; }
         Double TeamKillsTotal { get; }
 
-
         /* Weapon Stats, Current Round, All Rounds (Total)*/
         WeaponStatsInterface this[String WeaponName] { get; }
-
-
 
         /* Other data */
         Double TimeRound { get; }                // Time since round started
@@ -397,7 +377,6 @@ namespace PRoConEvents
         String ServerType { get; }
         Int32 GetFaction(Int32 TeamId);
 
-
         /* Team data */
         Double Tickets(Int32 TeamId);              // tickets for the specified team
         Double RemainTickets(Int32 TeamId);        // tickets remaining on specified team
@@ -405,7 +384,6 @@ namespace PRoConEvents
 
         Double StartTickets(Int32 TeamId);         // tickets at the begining of round for specified team
         Double TargetTickets { get; }            // tickets needed to win
-
 
         Int32 OppositeTeamId(Int32 TeamId);
         Int32 WinTeamId { get; } //id of the team that won previous round
@@ -538,12 +516,10 @@ namespace PRoConEvents
         Boolean Battlelog404 { get; } // True - Player has no PC Battlelog profile
         Boolean StatsError { get; }   // True - Error occurred while processing player stats
 
-
         /* Whitelist information */
         Boolean inClanWhitelist { get; }
         Boolean inPlayerWhitelist { get; }
         Boolean isInWhitelist { get; }
-
 
         /* Data Repository set/get custom data */
 
@@ -559,7 +535,6 @@ namespace PRoConEvents
         Dictionary<String, List<KillInfoInterface>> Killers { get; }
 
     }
-
 
     public interface PluginInterface
     {
@@ -593,8 +568,6 @@ namespace PRoConEvents
         void ConsoleError(String text);
         void ConsoleException(String text);
 
-
-
         /*
          * Methods for getting whitelist information
          *
@@ -616,7 +589,6 @@ namespace PRoConEvents
         Boolean setPluginVarValue(String variable, String value);
         String getPluginVarValue(String variable);
 
-
         /*
          *  Method: R
          *
@@ -624,7 +596,6 @@ namespace PRoConEvents
          */
 
         String R(String message);
-
 
         /*
          * Methods for actions
@@ -654,7 +625,6 @@ namespace PRoConEvents
          *           PBBanPlayerWithMessage(PBBanDuration.Permanent, ""micovery"", 0, ""You are banned forever!"");
          *           ServerCommand(""admin.listPlayers"", ""all"");
          */
-
 
         /* Other Methods */
 
@@ -707,10 +677,6 @@ namespace PRoConEvents
         void CallOtherPlugin(String className, String methodName, Hashtable parms);
         DateTime GetLastPluginDataUpdate(); // return timestamp for the last time InsaneLimits.UpdatePluginData() was called
     }
-
-
-
-
 
     public partial class InsaneLimits : PRoConPluginAPI, IPRoConPluginInterface, PluginInterface
     {
@@ -1006,7 +972,6 @@ namespace PRoConEvents
             "%t_xa%",     "Limit, number of times limit has been activated by the player's team",
             "%a_xa%",     "Limit, number of times limit has been activated by all players in the server",
 
-
             "%date%", "Current date, e.g. Sunday December 25, 2011",
             "%time%", "Current time, e.g. 12:00 AM",
 
@@ -1017,8 +982,6 @@ namespace PRoConEvents
             "%l_n%", "Limit name",
 
         };
-
-
 
         public static String NL = System.Environment.NewLine;
 
@@ -1079,7 +1042,6 @@ namespace PRoConEvents
         private DateTime last_data_change;
         private MatchCommand match_command_update_plugin_data;
 
-
         EventWaitHandle fetch_handle;
         EventWaitHandle enforcer_handle;
         EventWaitHandle settings_handle;
@@ -1103,7 +1065,6 @@ namespace PRoConEvents
         Thread finalizer;
         Thread moving_thread;
 
-
         public Object players_mutex = new Object();
         public Object settings_mutex = new Object();
         public Object message_mutex = new Object();
@@ -1113,10 +1074,8 @@ namespace PRoConEvents
         public Object limits_mutex = new Object();
         public Object updates_mutex = new Object();
 
-
         public Dictionary<String, Limit> limits;
         public Dictionary<String, CustomList> lists;
-
 
         public static String default_PIN_message = "Navigate to Twitter's authorization site to obtain the PIN";
         public static String default_twitter_consumer_key = "USQmPjXO3BFLDfWyLoAx0g";
@@ -1178,9 +1137,6 @@ namespace PRoConEvents
                 this.limits = new Dictionary<String, Limit>();
                 this.lists = new Dictionary<String, CustomList>();
 
-
-
-
                 /* Integers */
 
                 this.integerVariables = new Dictionary<String, Int32>();
@@ -1190,7 +1146,6 @@ namespace PRoConEvents
                 this.integerVariables.Add("debug_level", 3);
                 this.integerVariables.Add("smtp_port", 587);
                 this.integerVariables.Add("wait_timeout", 30);
-
 
                 this.integerVarValidators = new Dictionary<String, integerVariableValidator>();
                 this.integerVarValidators.Add("delete_limit", integerValidator);
@@ -1249,10 +1204,6 @@ namespace PRoConEvents
                 this.booleanVarValidators.Add("use_custom_privacy_policy", booleanValidator);
                 this.booleanVarValidators.Add("privacy_policy_agreement", booleanValidator);
 
-
-
-
-
                 /* Floats */
                 this.floatVariables = new Dictionary<String, Single>();
                 this.floatVariables.Add("say_interval", 0.05f);
@@ -1267,7 +1218,6 @@ namespace PRoConEvents
                 this.stringListVariables.Add("clan_white_list", @"clan1, clan2, clan3");
 
                 this.stringListVariables.Add("player_white_list", @"micovery, player2, player3");
-
 
                 /* Strings */
                 this.stringVariables = new Dictionary<String, String>();
@@ -1284,7 +1234,6 @@ namespace PRoConEvents
 
                 this.stringVariables.Add("proxy_url", "http://127.0.0.1:3128");
 
-
                 this.stringVariables.Add("twitter_verifier_pin", default_PIN_message);
                 this.stringVariables.Add("twitter_consumer_key", default_twitter_consumer_key);
                 this.stringVariables.Add("twitter_consumer_secret", default_twitter_consumer_secret);
@@ -1292,7 +1241,6 @@ namespace PRoConEvents
                 this.stringVariables.Add("twitter_access_token_secret", default_twitter_access_token_secret);
                 this.stringVariables.Add("twitter_user_id", default_twitter_user_id);
                 this.stringVariables.Add("twitter_screen_name", default_twitter_screen_name);
-
 
                 this.hidden_variables.Add("twitter_consumer_key", true);
                 this.hidden_variables.Add("twitter_consumer_secret", true);
@@ -1302,7 +1250,6 @@ namespace PRoConEvents
                 this.hidden_variables.Add("twitter_screen_name", true);
                 this.hidden_variables.Add("twitter_verifier_pin", true);
 
-
                 this.stringVarValidators = new Dictionary<String, stringVariableValidator>();
                 this.stringVarValidators.Add("console", stringValidator);
                 this.stringVarValidators.Add("new_limit", stringValidator);
@@ -1310,16 +1257,12 @@ namespace PRoConEvents
                 this.stringVarValidators.Add("new_list", stringValidator);
                 this.stringVarValidators.Add("twitter_verifier_pin", stringValidator);
 
-
-
-
                 /* Grouping settings */
                 List<String> limit_manager_group = new List<String>();
                 limit_manager_group.Add("delete_limit");
                 limit_manager_group.Add("new_limit");
                 limit_manager_group.Add("compile_limit");
                 settings_group.Add(LimitManagerG, limit_manager_group);
-
 
                 List<String> lists_manager_group = new List<String>();
                 lists_manager_group.Add("new_list");
@@ -1369,7 +1312,6 @@ namespace PRoConEvents
 
                 settings_group.Add(PrivacyPolicyG, privacy_policy);
 
-
                 settings_group_order.Add(SettingsG, 1);
                 settings_group_order.Add(PrivacyPolicyG, 2);
                 settings_group_order.Add(WhitelistG, 3);
@@ -1386,7 +1328,6 @@ namespace PRoConEvents
                 exported_variables.Add("tweet_my_plugin_state");
                 exported_variables.Add("privacy_policy_agreement");
 
-
                 /* Online keys BF3 */
 
                 json2key.Add("rank", "rank");
@@ -1400,13 +1341,11 @@ namespace PRoConEvents
                 json2key.Add("deaths", "deaths");
                 json2key.Add("numLosses", "losses");
 
-
                 json2key.Add("repairs", "repairs");
                 json2key.Add("revives", "revives");
                 json2key.Add("accuracy", "accuracy");
                 json2key.Add("resupplies", "ressuplies");
                 json2key.Add("quitPercentage", "quit_p");
-
 
                 json2key.Add("sc_team", "sc_team");
                 json2key.Add("combatScore", "sc_combat");
@@ -1438,13 +1377,11 @@ namespace PRoConEvents
                 json2keyBF4.Add("deaths", "deaths");
                 json2keyBF4.Add("numLosses", "losses");
 
-
                 json2keyBF4.Add("repairs", "repairs");
                 json2keyBF4.Add("revives", "revives");
                 json2keyBF4.Add("accuracy", "accuracy");
                 json2keyBF4.Add("resupplies", "ressuplies");
                 json2keyBF4.Add("quitPercentage", "quit_p");
-
 
                 json2keyBF4.Add("sc_team", "sc_team");
                 json2keyBF4.Add("combatScore", "sc_combat");
@@ -1485,7 +1422,6 @@ namespace PRoConEvents
                 wjson2prop.Add("shotsHit", "ShotsHit");
                 wjson2prop.Add("slug", "Slug");
                 wjson2prop.Add("timeEquipped", "TimeEquipped");
-
 
                 DataDict = new DataDictionary(this);
                 RoundDataDict = new DataDictionary(this);
@@ -1593,7 +1529,6 @@ namespace PRoConEvents
                 rcon2bwbf4["TOMAHAWK"] = "WARSAW_ID_P_INAME_MACHETE";
                 rcon2bwbf4["NLAW"] = "WARSAW_ID_P_INAME_MBTLAW";
 
-
                 rcon2bwbf4["DAMAGEAREA"] = null;
                 rcon2bwbf4["DEATH"] = null;
                 rcon2bwbf4["DEFIB"] = null;
@@ -1637,7 +1572,6 @@ namespace PRoConEvents
         public DataDictionaryInterface RoundData { get { return (DataDictionaryInterface)RoundDataDict; } }
         public DataDictionaryInterface DataRound { get { return (DataDictionaryInterface)RoundDataDict; } }
 
-
         public List<Int32> getSortedListsIds()
         {
             Dictionary<Int32, CustomList> lookup_table = new Dictionary<Int32, CustomList>();
@@ -1651,7 +1585,6 @@ namespace PRoConEvents
             ids.Sort(delegate (Int32 a, Int32 b) { return a.CompareTo(b); });
             return ids;
         }
-
 
         public List<Int32> getSortedLimitIds()
         {
@@ -1729,7 +1662,6 @@ namespace PRoConEvents
             return i.ToString();
         }
 
-
         public void createNewLimit()
         {
 
@@ -1761,7 +1693,6 @@ namespace PRoConEvents
             ConsoleWrite("New " + list.ShortName + " created");
             SaveSettings(true);
         }
-
 
         private (List<MetadataReference> references, CSharpCompilationOptions options) GenerateCompilerParameters()
         {

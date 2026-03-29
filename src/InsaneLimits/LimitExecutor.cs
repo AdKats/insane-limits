@@ -1,16 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -73,7 +68,6 @@ namespace PRoConEvents
 
         public void SetupReplacements(Limit limit, PlayerInfoInterface player, PlayerInfoInterface killer, KillInfoInterface kill, PlayerInfoInterface victim)
         {
-
 
             //Re-Adjust the targets, depending on the event type, so that no variables are NULL
             // Legend
@@ -188,7 +182,6 @@ namespace PRoConEvents
                             dict[key] = victim.FullName;
                             break;
 
-
                         // Player Repalcements (Evaluations: OnJoin, OnLeave, OnSpawn, OnAnyChat, OnTeamChange, and OnSuicide)
                         case "%p_n%":
                             dict[key] = player.Name;
@@ -273,7 +266,6 @@ namespace PRoConEvents
                             dict[key] = limit.Spree(player.Name).ToString();
                             break;
 
-
                         // Limit Specific Replacements (Evaluations: Any) (All Rounds)
                         case "%p_xa_th%":
                             value = limit.ActivationsTotal(player.Name);
@@ -303,7 +295,6 @@ namespace PRoConEvents
                         case "%a_xa%":
                             dict[key] = limit.ActivationsTotal().ToString();
                             break;
-
 
                         // Other Replacements
                         case "%date%":
@@ -341,9 +332,7 @@ namespace PRoConEvents
                 }
             }
 
-
             //setup the advanced replacements
-
 
             Dictionary<String, Object> map = new Dictionary<String, Object>();
             map.Add("limit", (Object)limit);
@@ -353,7 +342,6 @@ namespace PRoConEvents
             map.Add("victim", (Object)victim);
             map.Add("plugin", (Object)this);
             map.Add("server", (Object)serverInfo);
-
 
             foreach (KeyValuePair<String, Object> pair in map)
             {
@@ -383,8 +371,6 @@ namespace PRoConEvents
                         if (!AdvancedReplacementsDict.ContainsKey(key))
                             AdvancedReplacementsDict.Add(key, String.Empty);
 
-
-
                         result = prop.GetValue(data, null);
 
                         if (result == null)
@@ -404,12 +390,6 @@ namespace PRoConEvents
                 }
 
             }
-
-
-
-
-
-
 
         }
 
@@ -482,7 +462,6 @@ namespace PRoConEvents
                                             null
                                        );
         }
-
 
         public PlayerInfoInterface determineActionTarget(Limit limit, PlayerInfoInterface player, PlayerInfoInterface killer, PlayerInfoInterface victim)
         {
@@ -583,12 +562,10 @@ namespace PRoConEvents
         public String buildFunctionArguments(Limit limit, String search, String class_source)
         {
 
-
             String extra = String.Empty;
 
             if (search.StartsWith("second"))
                 extra += ", LimitInfoInterface limit";
-
 
             switch (limit.Evaluation)
             {
@@ -623,8 +600,6 @@ namespace PRoConEvents
 
         }
 
-
-
         /*
         // Not needed anymore, OnJoin limits are evaluated once only in OnPlayerJoin
         public Boolean shouldSkipEvaluation(Limit limit, PlayerInfoInterface player)
@@ -634,7 +609,6 @@ namespace PRoConEvents
 
             return false;
         }*/
-
 
         public Boolean executeLimitCheck(Limit limit, String method, PlayerInfoInterface player, PlayerInfoInterface killer, PlayerInfoInterface victim, KillInfoInterface kill)
         {
@@ -651,7 +625,6 @@ namespace PRoConEvents
             // find the method through reflection
             if ((class_method = class_type.GetMethod(method)) == null)
                 throw new EvaluateException(FormatMessage("could not find method ^b" + method + "^n, in " + limit.ShortDisplayName, MessageType.Error));
-
 
             Dictionary<Int32, TeamInfoInterface> teams = new Dictionary<Int32, TeamInfoInterface>();
             for (Int32 i = 1; i <= 4; i++)
@@ -672,11 +645,6 @@ namespace PRoConEvents
             return (Boolean)result;
 
         }
-
-
-
-
-
 
         //wrapper, to synchronize limit evaluation
         public Boolean executeLimitAction(
@@ -712,7 +680,6 @@ namespace PRoConEvents
                                        )
         {
 
-
             try
             {
 
@@ -731,14 +698,10 @@ namespace PRoConEvents
                 if (limit.FirstCheck.Equals(Limit.LimitType.Disabled))
                     return false;
 
-
                 // call setup replacements early, in case user has a Code type of limit
                 SetupReplacements(limit, target, killer, kill, victim);
 
-
                 Boolean result = executeLimitCheck(limit, "FirstCheck", target, killer, victim, kill);
-
-
 
                 /*
                 // Not needed anymore, OnJoin limits are evaluated once only in OnPlayerJoin
@@ -761,11 +724,8 @@ namespace PRoConEvents
                 if (!limit.SecondCheck.Equals(Limit.LimitType.Disabled) && !limit.SecondCheckEmpty)
                     result = executeLimitCheck(limit, "SecondCheck", target, killer, victim, kill);
 
-
                 if (!result)
                     return false;
-
-
 
                 Limit.LimitAction action = limit.Action;
 
@@ -774,8 +734,6 @@ namespace PRoConEvents
                     DebugWrite("^b" + target.Name + "^n activated " + limit.ShortDisplayName, 3);
                     return true;
                 }
-
-
 
                 if ((action & Limit.LimitAction.Say) > 0)
                 {
@@ -816,13 +774,10 @@ namespace PRoConEvents
                             break;
                     }
 
-
-
                     // exit early if action is only say
                     if (action.Equals(Limit.LimitAction.Say))
                         return !VMode;
                 }
-
 
                 if ((action & Limit.LimitAction.Yell) > 0)
                 {
@@ -864,8 +819,6 @@ namespace PRoConEvents
                             break;
                     }
 
-
-
                     // exit early if action is only yell
                     if (action.Equals(Limit.LimitAction.Yell))
                         return !VMode;
@@ -898,7 +851,6 @@ namespace PRoConEvents
                     String subject = R(limit.MailSubject);
                     String address = limit.MailAddress;
 
-
                     DebugWrite("sending mail(" + address + ") player ^b" + target.Name + "^n, (activated " + limit.ShortDisplayName + "), with subject: \"" + subject + "\"", 3);
                     SendMail(address, subject, message);
 
@@ -916,7 +868,6 @@ namespace PRoConEvents
                     String country = limit.SMSCountry;
                     String carrier = limit.SMSCarrier;
 
-
                     DebugWrite("sending SMS(" + number + ") player ^b" + target.Name + "^n, (activated " + limit.ShortDisplayName + ")", 3);
                     SendSMS(country, carrier, number, message);
 
@@ -932,7 +883,6 @@ namespace PRoConEvents
                     String status = R(limit.TweetStatus);
                     String account = getStringVarValue("twitter_screen_name");
 
-
                     DebugWrite("sending Tweet (@" + account + "): \"" + status + "\"", 3);
                     Tweet(status);
 
@@ -947,7 +897,6 @@ namespace PRoConEvents
 
                     String text = R(limit.PRoConChatText);
 
-
                     DebugWrite("sending procon-chat \"" + text + "\"", 3);
                     PRoConChat(text);
 
@@ -956,17 +905,14 @@ namespace PRoConEvents
                         return !VMode;
                 }
 
-
                 if ((action & Limit.LimitAction.PRoConEvent) > 0)
                 {
                     action = action & ~Limit.LimitAction.PRoConEvent;
-
 
                     EventType type = limit.PRoConEventType;
                     CapturableEvent name = limit.PRoConEventName;
                     String text = R(limit.PRoConEventText);
                     String pname = R(limit.PRoConEventPlayer);
-
 
                     DebugWrite("sending procon event(type:^b" + type.ToString() + "^n, name: ^b" + name.ToString() + "^n, player:^b" + pname + "^n) \"" + text + "\"", 3);
 
@@ -976,7 +922,6 @@ namespace PRoConEvents
                     if (action.Equals(Limit.LimitAction.PRoConEvent))
                         return !VMode;
                 }
-
 
                 if ((action & Limit.LimitAction.TaskbarNotify) > 0)
                 {
@@ -1020,9 +965,6 @@ namespace PRoConEvents
                     if (EABanPlayerWithMessage(btype, bduration, target.Name, bminutes, bmessage))
                         result = true;
                 }
-
-
-
 
                 if ((action & Limit.LimitAction.PBBan) > 0)
                 {
@@ -1089,8 +1031,6 @@ namespace PRoConEvents
                     if (KillPlayer(target.Name, delay))
                         result = true;
                 }
-
-
 
                 if ((action & (Limit.LimitAction)0xFF) > 0)
                     throw new EvaluateException(FormatMessage("unknown limit action " + action.ToString() + " for " + limit.ShortDisplayName, MessageType.Error));

@@ -1,18 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Net.Mail;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
@@ -49,7 +40,6 @@ namespace PRoConEvents
         {
             return "www.insanegamersasylum.com";
         }
-
 
         public String GetPluginDescription()
         {
@@ -294,7 +284,6 @@ public interface LimitInfoInterface
     Double Activations(String PlayerName, TimeSpan time);
     Double Activations();
 
-
     //Number of times the limit has been activated (All rounds)
     Double ActivationsTotal(String PlayerName);
     Double ActivationsTotal(Int32 TeamId, Int32 SquadId);
@@ -310,7 +299,6 @@ public interface LimitInfoInterface
      */
 
     Double Spree(String PlayerName);
-
 
     // manually resets the Spree value for the player, (only for power-users)
     void ResetSpree(String PlayerName);
@@ -388,7 +376,6 @@ public interface ServerInfoInterface
     Double SuicidesRound { get; }
     Double TeamKillsRound { get; }
 
-
     /* All players, All rounds, Stats */
 
     Double KillsTotal { get; }
@@ -396,7 +383,6 @@ public interface ServerInfoInterface
     Double HeadshotsTotal { get; }
     Double SuicidesTotal { get; }
     Double TeamKillsTotal { get; }
-
 
     /* Weapon Stats, Current Round, All Rounds (Total)*/
     WeaponStatsInterface this[String WeaponName] { get; }
@@ -540,7 +526,6 @@ public interface PlayerInfoInterface
     Int32 AveragePing { get; } // of two to five samples
     Int32 Role { get; } // BF4: 0 = PLAYER, 1 = SPECTATOR, 2 = COMMANDER, 3 = MOBILE COMMANDER
 
-
     /* Current round, Player Stats */
     Double KdrRound { get; }
     Double KpmRound { get; }
@@ -580,12 +565,10 @@ public interface PlayerInfoInterface
     Boolean Battlelog404 { get; } // True - Player has PC Battlelog profile
     Boolean StatsError { get; }   // True - Error occurred while processing player stats
 
-
     /* Whitelist information */
     Boolean inClanWhitelist { get; }
     Boolean inPlayerWhitelist { get; }
     Boolean isInWhitelist { get; }
-
 
     /* Data Repository set/get custom data */
 
@@ -650,14 +633,12 @@ public interface PluginInterface
     Boolean setPluginVarValue(String variable, String value);
     String getPluginVarValue(String variable);
 
-
     /*
      *  Method: R
      *
      *  Replaces tags like %p_n% (Player Name), %k_n% (Killer Name), %v_n% (Victim Name), etc
      */
     String R(String message);
-
 
     /*
      * Methods for actions
@@ -687,7 +668,6 @@ public interface PluginInterface
      *           PBBanPlayerWithMessage(PBBanDuration.Permanent, ""micovery"", 0, ""You are banned forever!"");
      *           ServerCommand(""admin.listPlayers"", ""all"");
      */
-
 
     /* Other Methods */
     String FriendlySpan(TimeSpan span);         //converts a TimeSpan into a friendly formatted String e.g. ""2 hours, 20 minutes, 15 seconds""
@@ -900,7 +880,6 @@ public interface DataDictionaryInterface
         ""%a_x%"",     ""Limit, number of times limit has been activated by all players in the server"",
         ""%r_x%"",     ""Limit, number of times limit has been activated by player without Spree value being reset"",
 
-
         // Limit Replacements for Activations & Spree Counts (Evaluations: Any) ... (All Rounds)
         /* Legend:
          * xa - Total count, for all rounds
@@ -913,7 +892,6 @@ public interface DataDictionaryInterface
         ""%s_xa%"",     ""Limit, number of times limit has been activated by the player's squad"",
         ""%t_xa%"",     ""Limit, number of times limit has been activated by the player's team"",
         ""%a_xa%"",     ""Limit, number of times limit has been activated by all players in the server"",
-
 
         ""%date%"", ""Current date, e.g. Sunday December 25, 2011"",
         ""%time%"", ""Current time, e.g. 12:00 AM""
