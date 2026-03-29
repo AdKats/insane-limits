@@ -11,8 +11,6 @@
  */
 
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -27,10 +25,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
-using System.Windows.Forms;
 
-using Microsoft.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
@@ -1071,8 +1068,8 @@ namespace PRoConEvents
         public Dictionary<String, Boolean> hidden_variables;
         public List<String> exported_variables;
         public Dictionary<String, Int32> settings_group_order;
-        public CodeDomProvider compiler;
-        public CompilerParameters compiler_parameters;
+        public List<MetadataReference> compiler_references;
+        public CSharpCompilationOptions compiler_options;
         public Dictionary<String, String> ReplacementsDict;
         public Dictionary<String, String> AdvancedReplacementsDict;
         public Dictionary<String, Dictionary<String, String>> CarriersDict;
@@ -1766,33 +1763,34 @@ namespace PRoConEvents
         }
 
 
-        private CompilerParameters GenerateCompilerParameters()
+        private (List<MetadataReference> references, CSharpCompilationOptions options) GenerateCompilerParameters()
         {
+            var references = new List<MetadataReference>();
 
-            CompilerParameters parameters = new CompilerParameters();
-            parameters.ReferencedAssemblies.Add("System.dll");
-            parameters.ReferencedAssemblies.Add("System.Data.dll");
-            parameters.ReferencedAssemblies.Add("System.Windows.Forms.dll");
-            parameters.ReferencedAssemblies.Add("System.Xml.dll");
-            //parameters.ReferencedAssemblies.Add("System.Linq.dll");
+            // Add references to runtime assemblies by resolving from loaded assemblies
+            foreach (String asmName in new[] { "System.Runtime", "System.Collections", "System.Data.Common", "System.Xml.ReaderWriter", "System.Net.Primitives", "System.Net.Mail", "System.Threading.Thread", "System.Text.RegularExpressions", "netstandard", "System.Private.CoreLib" })
+            {
+                Assembly loaded = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(a => a.GetName().Name == asmName);
+                if (loaded != null && !String.IsNullOrEmpty(loaded.Location))
+                    references.Add(MetadataReference.CreateFromFile(loaded.Location));
+            }
+
+            // Add the InsaneLimits plugin assembly itself
+            String pluginDll;
             if (game_version == "BF3")
-                parameters.ReferencedAssemblies.Add("Plugins/BF3/InsaneLimits.dll");
+                pluginDll = "Plugins/BF3/InsaneLimits.dll";
             else if (game_version == "BFHL")
-                parameters.ReferencedAssemblies.Add("Plugins/BFHL/InsaneLimits.dll");
+                pluginDll = "Plugins/BFHL/InsaneLimits.dll";
             else
-                parameters.ReferencedAssemblies.Add("Plugins/BF4/InsaneLimits.dll");
+                pluginDll = "Plugins/BF4/InsaneLimits.dll";
 
-            parameters.GenerateInMemory = true;
-            parameters.IncludeDebugInformation = false;
+            references.Add(MetadataReference.CreateFromFile(pluginDll));
 
-            String procon_path = Directory.GetParent(Application.ExecutablePath).FullName;
-            String plugins_path = Path.Combine(procon_path, Path.Combine("Plugins", "BF3"));
+            var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithOptimizationLevel(OptimizationLevel.Release);
 
-            parameters.TempFiles = new TempFileCollection(plugins_path);
-            //parameters.TempFiles.KeepFiles = false;
-
-
-            return parameters;
+            return (references, options);
         }
     }
 }

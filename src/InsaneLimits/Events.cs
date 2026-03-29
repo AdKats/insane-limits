@@ -1,6 +1,4 @@
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -15,10 +13,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
-using System.Windows.Forms;
-
-using Microsoft.CSharp;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;

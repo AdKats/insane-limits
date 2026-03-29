@@ -1,6 +1,4 @@
 using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -15,10 +13,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web;
-using System.Windows.Forms;
-
-using Microsoft.CSharp;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
@@ -2662,7 +2656,7 @@ namespace PRoConEvents
             try
             {
                 if (!Path.IsPathRooted(path))
-                    path = Path.Combine(Directory.GetParent(Application.ExecutablePath).FullName, path);
+                    path = Path.Combine(Directory.GetParent(Environment.ProcessPath).FullName, path);
 
 
                 using (FileStream fs = File.Open(path, FileMode.Append))
@@ -3672,7 +3666,7 @@ namespace PRoConEvents
 
         public static String makeRelativePath(String file)
         {
-            String exe_path = Directory.GetParent(Application.ExecutablePath).FullName;
+            String exe_path = Directory.GetParent(Environment.ProcessPath).FullName;
             String dll_path = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
 
             String rel_path = dll_path.Replace(exe_path, "");
