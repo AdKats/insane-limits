@@ -48,7 +48,7 @@ namespace PRoConEvents
 
         public String GetPluginAuthor()
         {
-            return "micovery";
+            return "micovery (maintained by Prophet731)";
         }
 
         public String GetPluginWebsite()
