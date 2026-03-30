@@ -675,6 +675,12 @@ namespace PRoConEvents
         DateTime GetLastPluginDataUpdate(); // return timestamp for the last time InsaneLimits.UpdatePluginData() was called
     }
 
+    public class EvaluateException : Exception
+    {
+        public EvaluateException(String message) : base(message) { }
+        public EvaluateException(String message, Exception inner) : base(message, inner) { }
+    }
+
     public partial class InsaneLimits : PRoConPluginAPI, IPRoConPluginInterface, PluginInterface
     {
         public String server_host = String.Empty;
