@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Flurl.Http" Version="4.*" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.*" />
   </ItemGroup>
 

@@ -11,6 +11,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Flurl.Http;
+
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
 using PRoCon.Core.Maps;
@@ -4479,20 +4481,23 @@ namespace PRoConEvents
 
     public class OAuthRequest
     {
-        public HttpWebRequest request = null;
+        public Uri Url = null;
+        public IFlurlRequest FlurlRequest = null;
         InsaneLimits plugin = null;
 
         HMACSHA1 SHA1 = null;
 
         public List<KeyValuePair<String, String>> parameters = new List<KeyValuePair<String, String>>();
 
-        public HTTPMethod Method { set { request.Method = value.ToString(); } get { return (HTTPMethod)Enum.Parse(typeof(HTTPMethod), request.Method); } }
+        public HTTPMethod Method { set; get; }
+        public String PostBody { set; get; }
 
         public OAuthRequest(InsaneLimits plugin, String URL)
         {
             this.plugin = plugin;
-            this.request = (HttpWebRequest)HttpWebRequest.Create(URL);
-            this.request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 4.0.20506)";
+            this.Url = new Uri(URL);
+            this.FlurlRequest = URL
+                .WithHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3 (.NET CLR 4.0.20506)");
         }
 
         public void Sort()
@@ -4533,10 +4538,10 @@ namespace PRoConEvents
 
         public String Signature(String ConsumerSecret, String AccessTokenSecret)
         {
-            String base_url = request.Address.Scheme + "://" + request.Address.Host + request.Address.AbsolutePath;
+            String base_url = Url.Scheme + "://" + Url.Host + Url.AbsolutePath;
             String encoded_base_url = UrlEncode(base_url);
 
-            String http_method = request.Method;
+            String http_method = Method.ToString();
 
             Sort();
 

@@ -12,6 +12,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+
+using Flurl.Http;
 
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
@@ -1669,19 +1672,13 @@ namespace PRoConEvents
                 /* Create the Status Update Request */
                 OAuthRequest orequest = TwitterStatusUpdateRequest(status, access_token, access_token_secret, consumer_key, consumer_secret);
 
-                HttpWebResponse oresponse = (HttpWebResponse)orequest.request.GetResponse();
+                String response = orequest.FlurlRequest
+                    .PostStringAsync(orequest.PostBody ?? "")
+                    .ReceiveString()
+                    .Result;
 
-                String protcol = "HTTP/" + oresponse.ProtocolVersion + " " + (Int32)oresponse.StatusCode;
-
-                if (!oresponse.StatusCode.Equals(HttpStatusCode.OK))
-                    throw new TwitterException("Twitter UpdateStatus Request failed, " + protcol);
-
-                if (oresponse.ContentLength == 0)
-                    throw new TwitterException("Twitter UpdateStatus Request failed, ContentLength=0");
-
-                StreamReader sin = new StreamReader(oresponse.GetResponseStream());
-                String response = sin.ReadToEnd();
-                sin.Close();
+                if (String.IsNullOrEmpty(response))
+                    throw new TwitterException("Twitter UpdateStatus Request failed, empty response");
 
                 Hashtable data = (Hashtable)JSON.JsonDecode(response);
 
@@ -1699,7 +1696,7 @@ namespace PRoConEvents
                 if (!quiet)
                     ConsoleException(e.Message);
             }
-            catch (WebException e)
+            catch (FlurlHttpException e)
             {
                 if (!quiet)
                     HandleTwitterWebException(e, "UpdateStatus");
@@ -1732,18 +1729,13 @@ namespace PRoConEvents
 
                 OAuthRequest orequest = TwitterAccessTokenRequest(PIN, oauth_token, oauth_token_secret);
 
-                HttpWebResponse oresponse = (HttpWebResponse)orequest.request.GetResponse();
+                String response = orequest.FlurlRequest
+                    .PostStringAsync(orequest.PostBody ?? "")
+                    .ReceiveString()
+                    .Result;
 
-                String protcol = "HTTP/" + oresponse.ProtocolVersion + " " + (Int32)oresponse.StatusCode;
-
-                if (!oresponse.StatusCode.Equals(HttpStatusCode.OK))
-                    throw new TwitterException("Twitter AccessToken Request failed, " + protcol);
-
-                if (oresponse.ContentLength == 0)
-                    throw new TwitterException("Twitter AccessToken Request failed, ContentLength=0");
-
-                StreamReader sin = new StreamReader(oresponse.GetResponseStream());
-                String response = sin.ReadToEnd();
+                if (String.IsNullOrEmpty(response))
+                    throw new TwitterException("Twitter AccessToken Request failed, empty response");
 
                 DebugWrite("ACCESS_TOKEN_RESPONSE: " + response, 5);
 
@@ -1794,7 +1786,7 @@ namespace PRoConEvents
                 ConsoleWarn("Set the field ^btwitter_setup_account^n to ^bTrue^n to re-initiate the Twitter configuration");
                 return;
             }
-            catch (WebException e)
+            catch (FlurlHttpException e)
             {
                 HandleTwitterWebException(e, "AccessToken");
             }
@@ -1816,17 +1808,13 @@ namespace PRoConEvents
 
                 OAuthRequest orequest = TwitterRequestTokenRequest();
 
-                HttpWebResponse oresponse = (HttpWebResponse)orequest.request.GetResponse();
-                String protcol = "HTTP/" + oresponse.ProtocolVersion + " " + (Int32)oresponse.StatusCode;
+                String response = orequest.FlurlRequest
+                    .PostStringAsync(orequest.PostBody ?? "")
+                    .ReceiveString()
+                    .Result;
 
-                if (!oresponse.StatusCode.Equals(HttpStatusCode.OK))
-                    throw new TwitterException("Twitter RequestToken Request failed, " + protcol);
-
-                if (oresponse.ContentLength == 0)
-                    throw new TwitterException("Twitter RequestToken Request failed, ContentLength=0");
-
-                StreamReader sin = new StreamReader(oresponse.GetResponseStream());
-                String response = sin.ReadToEnd();
+                if (String.IsNullOrEmpty(response))
+                    throw new TwitterException("Twitter RequestToken Request failed, empty response");
 
                 Dictionary<String, String> pairs = ParseQueryString(response);
 
@@ -1862,7 +1850,7 @@ namespace PRoConEvents
                 ConsoleException(e.Message);
                 return;
             }
-            catch (WebException e)
+            catch (FlurlHttpException e)
             {
                 HandleTwitterWebException(e, "RequestToken");
             }
@@ -1873,42 +1861,38 @@ namespace PRoConEvents
 
         }
 
-        public void HandleTwitterWebException(WebException e, String prefix)
+        public void HandleTwitterWebException(FlurlHttpException e, String prefix)
         {
-            HttpWebResponse response = (HttpWebResponse)e.Response;
-            String protcol = (response == null) ? "" : "HTTP/" + response.ProtocolVersion;
+            Int32 statusCode = e.StatusCode ?? 0;
 
             String error = String.Empty;
             //try reading JSON response
-            if (response != null && response.ContentType != null && response.ContentType.ToLower().Contains("json"))
+            try
             {
-                try
+                String data = e.GetResponseStringAsync().Result;
+                if (!String.IsNullOrEmpty(data))
                 {
-                    StreamReader sin = new StreamReader(response.GetResponseStream());
-                    String data = sin.ReadToEnd();
-                    sin.Close();
-
                     Hashtable jdata = (Hashtable)JSON.JsonDecode(data);
-                    if (jdata == null || !jdata.ContainsKey("error") ||
-                        jdata["error"] == null || !jdata["error"].GetType().Equals(typeof(String)))
-                        throw new Exception();
-
-                    error = "Twitter Error: " + (String)jdata["error"] + ", ";
+                    if (jdata != null && jdata.ContainsKey("error") &&
+                        jdata["error"] != null && jdata["error"].GetType().Equals(typeof(String)))
+                    {
+                        error = "Twitter Error: " + (String)jdata["error"] + ", ";
+                    }
                 }
-                catch (Exception)
-                {
-                }
+            }
+            catch (Exception)
+            {
             }
 
             /* Handle Time-Out Gracefully */
-            if (e.Status.Equals(WebExceptionStatus.Timeout))
+            if (e.InnerException is TaskCanceledException)
             {
-                ConsoleException("Twitter " + prefix + " Request(" + protcol + ") timed-out");
+                ConsoleException("Twitter " + prefix + " Request(HTTP " + statusCode + ") timed-out");
                 return;
             }
-            else if (e.Status.Equals(WebExceptionStatus.ProtocolError))
+            else if (statusCode > 0)
             {
-                ConsoleException("Twitter " + prefix + " Request(" + protcol + ") failed, " + error + " " + e.GetType() + ": " + e.Message);
+                ConsoleException("Twitter " + prefix + " Request(HTTP " + statusCode + ") failed, " + error + " " + e.GetType() + ": " + e.Message);
                 return;
             }
             else
@@ -1948,11 +1932,10 @@ namespace PRoConEvents
 
             OAuthRequest orequest = new OAuthRequest(this, "https://api.twitter.com/1.1/statuses/update.json"); // Fix #48
             orequest.Method = HTTPMethod.POST;
-            orequest.request.ContentType = "application/x-www-form-urlencoded";
 
             /* Set the Post Data */
 
-            Byte[] data = Encoding.UTF8.GetBytes("status=" + OAuthRequest.UrlEncode(Encoding.UTF8.GetBytes(status)));
+            String postBody = "status=" + OAuthRequest.UrlEncode(Encoding.UTF8.GetBytes(status));
 
             // Parameters required by the Twitter OAuth Protocol
             orequest.parameters.Add(new KeyValuePair<String, String>("oauth_consumer_key", consumer_key));
@@ -1967,16 +1950,14 @@ namespace PRoConEvents
             String signature = orequest.Signature(consumer_secret, access_token_secret);
             orequest.parameters.Add(new KeyValuePair<String, String>("oauth_signature", OAuthRequest.UrlEncode(signature)));
 
-            // Add the OAuth authentication header
+            // Add the OAuth authentication header and content type
             String OAuthHeader = orequest.Header();
-            orequest.request.AuthenticationLevel = System.Net.Security.AuthenticationLevel.MutualAuthRequired;
-            orequest.request.Headers["Authorization"] = OAuthHeader;
+            orequest.FlurlRequest
+                .WithHeader("Authorization", OAuthHeader)
+                .WithHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            // Add the POST body
-            orequest.request.ContentLength = data.Length;
-            Stream sout = orequest.request.GetRequestStream();
-            sout.Write(data, 0, data.Length);
-            sout.Close();
+            // Store POST body for caller to send
+            orequest.PostBody = postBody;
 
             return orequest;
         }
@@ -1985,7 +1966,6 @@ namespace PRoConEvents
         {
             OAuthRequest orequest = new OAuthRequest(this, "https://api.twitter.com/oauth/access_token"); // Fix #48
             orequest.Method = HTTPMethod.POST;
-            orequest.request.ContentLength = 0;
 
             // Parameters required by the Twitter OAuth Protocol
             orequest.parameters.Add(new KeyValuePair<String, String>("oauth_consumer_key", getStringVarValue("twitter_consumer_key")));
@@ -2002,8 +1982,8 @@ namespace PRoConEvents
 
             // Add the OAuth authentication header
             String OAuthHeader = orequest.Header();
-            orequest.request.AuthenticationLevel = System.Net.Security.AuthenticationLevel.MutualAuthRequired;
-            orequest.request.Headers["Authorization"] = OAuthHeader;
+            orequest.FlurlRequest
+                .WithHeader("Authorization", OAuthHeader);
 
             return orequest;
         }
@@ -2012,7 +1992,6 @@ namespace PRoConEvents
         {
             OAuthRequest orequest = new OAuthRequest(this, "https://api.twitter.com/oauth/request_token"); // Fix #48
             orequest.Method = HTTPMethod.POST;
-            orequest.request.ContentLength = 0;
 
             // Parameters required by the Twitter OAuth Protocol
             orequest.parameters.Add(new KeyValuePair<String, String>("oauth_callback", OAuthRequest.UrlEncode("oob")));
@@ -2028,8 +2007,8 @@ namespace PRoConEvents
 
             // Add the OAuth authentication header
             String OAuthHeader = orequest.Header();
-            orequest.request.AuthenticationLevel = System.Net.Security.AuthenticationLevel.MutualAuthRequired;
-            orequest.request.Headers["Authorization"] = OAuthHeader;
+            orequest.FlurlRequest
+                .WithHeader("Authorization", OAuthHeader);
 
             return orequest;
         }
