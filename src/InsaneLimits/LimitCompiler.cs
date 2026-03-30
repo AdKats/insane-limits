@@ -6,10 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
 using PRoCon.Core.Maps;
@@ -148,73 +144,15 @@ namespace PRoConEvents
             try
             {
                 limit.Reset();
-
-                if (compiler_references == null || compiler_options == null)
-                {
-                    var result = GenerateCompilerParameters();
-                    compiler_references = result.references;
-                    compiler_options = result.options;
-                }
-
                 limit.evaluator = null;
                 limit.type = null;
 
                 SendCompilingMessage(limit);
 
-                if (limit.FirstCheckEmpty)
-                    return;
-
-                String class_source = buildLimitSource(limit);
-
-                SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(class_source);
-
-                CSharpCompilation compilation = CSharpCompilation.Create(
-                    "LimitAssembly_" + limit.id,
-                    syntaxTrees: new[] { syntaxTree },
-                    references: compiler_references,
-                    options: compiler_options);
-
-                using (var ms = new MemoryStream())
-                {
-                    EmitResult emitResult = compilation.Emit(ms);
-
-                    if (!emitResult.Success)
-                    {
-                        var errors = emitResult.Diagnostics
-                            .Where(d => d.Severity == DiagnosticSeverity.Error)
-                            .ToList();
-
-                        // Display compilation errors.
-                        ConsoleError("" + errors.Count + " error" + ((errors.Count > 1) ? "s" : "") + " compiling " + limit.FirstCheck.ToString());
-                        foreach (Diagnostic diag in errors)
-                        {
-                            var lineSpan = diag.Location.GetLineSpan();
-                            Int32 line = lineSpan.StartLinePosition.Line + 1;
-                            Int32 column = lineSpan.StartLinePosition.Character + 1;
-                            ConsoleError("(" + diag.Id + ", line: " + line + ", column: " + column + "):  " + diag.GetMessage());
-                        }
-
-                        return;
-                    }
-                    else
-                    {
-                        ms.Seek(0, SeekOrigin.Begin);
-                        Assembly compiledAssembly = Assembly.Load(ms.ToArray());
-
-                        String class_name = getClassName(limit);
-                        Type class_type = compiledAssembly.GetType("PRoConEvents." + class_name);
-
-                        ConstructorInfo class_ctor = class_type.GetConstructor(new Type[] { });
-                        if (class_ctor == null)
-                            throw new CompileException(FormatMessage("could not find constructor for ^b" + class_name + "^n", MessageType.Error));
-
-                        Object class_object = class_ctor.Invoke(new Object[] { });
-
-                        limit.evaluator = class_object;
-                        limit.type = class_type;
-                        return;
-                    }
-                }
+                // Dynamic limit compilation is not yet supported in Procon v2.
+                // Roslyn (Microsoft.CodeAnalysis) assemblies are not available to plugins at runtime.
+                ConsoleError("Dynamic limit compilation is not yet supported in Procon v2. Limit " + limit.ShortDisplayName + " will not be compiled.");
+                return;
             }
             catch (CompileException e)
             {

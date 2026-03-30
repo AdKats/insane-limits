@@ -19,9 +19,6 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-
 using PRoCon.Core;
 using PRoCon.Core.Battlemap;
 using PRoCon.Core.Maps;
@@ -1031,8 +1028,8 @@ namespace PRoConEvents
         public Dictionary<String, Boolean> hidden_variables;
         public List<String> exported_variables;
         public Dictionary<String, Int32> settings_group_order;
-        public List<MetadataReference> compiler_references;
-        public CSharpCompilationOptions compiler_options;
+        public Object compiler_references;
+        public Object compiler_options;
         public Dictionary<String, String> ReplacementsDict;
         public Dictionary<String, String> AdvancedReplacementsDict;
         public Dictionary<String, Dictionary<String, String>> CarriersDict;
@@ -1694,34 +1691,11 @@ namespace PRoConEvents
             SaveSettings(true);
         }
 
-        private (List<MetadataReference> references, CSharpCompilationOptions options) GenerateCompilerParameters()
+        private (Object references, Object options) GenerateCompilerParameters()
         {
-            var references = new List<MetadataReference>();
-
-            // Add references to runtime assemblies by resolving from loaded assemblies
-            foreach (String asmName in new[] { "System.Runtime", "System.Collections", "System.Data.Common", "System.Xml.ReaderWriter", "System.Net.Primitives", "System.Net.Mail", "System.Threading.Thread", "System.Text.RegularExpressions", "netstandard", "System.Private.CoreLib" })
-            {
-                Assembly loaded = AppDomain.CurrentDomain.GetAssemblies()
-                    .FirstOrDefault(a => a.GetName().Name == asmName);
-                if (loaded != null && !String.IsNullOrEmpty(loaded.Location))
-                    references.Add(MetadataReference.CreateFromFile(loaded.Location));
-            }
-
-            // Add the InsaneLimits plugin assembly itself
-            String pluginDll;
-            if (game_version == "BF3")
-                pluginDll = "Plugins/BF3/InsaneLimits.dll";
-            else if (game_version == "BFHL")
-                pluginDll = "Plugins/BFHL/InsaneLimits.dll";
-            else
-                pluginDll = "Plugins/BF4/InsaneLimits.dll";
-
-            references.Add(MetadataReference.CreateFromFile(pluginDll));
-
-            var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-                .WithOptimizationLevel(OptimizationLevel.Release);
-
-            return (references, options);
+            // Dynamic limit compilation is not yet supported in Procon v2.
+            // Roslyn (Microsoft.CodeAnalysis) assemblies are not available to plugins at runtime.
+            return (null, null);
         }
     }
 }
